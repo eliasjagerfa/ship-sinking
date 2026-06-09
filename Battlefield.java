@@ -1,7 +1,7 @@
 public class Battlefield {
-    private byte width;
-    private byte height;
-    private byte[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit
+    final byte width;
+    final byte height;
+    final byte[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit
     private byte occupiedFields;
     private byte hitFields;
 
@@ -20,7 +20,7 @@ public class Battlefield {
             }
         }
         catch(IndexOutOfBoundsException err){}
-        
+
         return false;
     }    
     
