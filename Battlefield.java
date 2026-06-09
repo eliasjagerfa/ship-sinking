@@ -11,6 +11,20 @@ public class Battlefield {
         this.coordinateSystem = new byte[height][width];
     }
 
+    public boolean setShip(Ship ship) {
+        for(int i = 0; i < 2; i++) { 
+            try{
+                if(i == 0) {
+                    
+                }   
+                else {
+
+                } 
+            }
+            catch(IndexOutOfBoundsException err) {return false;}
+        }
+        
+    }
     public boolean hitField(byte x, byte y) {
         try{
             byte shotField = coordinateSystem[x][y];
@@ -22,7 +36,7 @@ public class Battlefield {
         catch(IndexOutOfBoundsException err){}
 
         return false;
-    }    
+    }   
     
     public boolean allAreSunken() {
         return (hitFields == occupiedFields);
