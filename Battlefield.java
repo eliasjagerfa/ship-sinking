@@ -12,14 +12,18 @@ public class Battlefield {
     }
 
     public boolean hitField(byte x, byte y) {
-        byte shotField = coordinateSystem[x][y];
-        if(shotField == 0) {
-            shotField = 1;
-            return true;
+        try{
+            byte shotField = coordinateSystem[x][y];
+            if(shotField == 0 || shotField == 2) {
+                coordinateSystem[x][y]++;
+                return true;
+            }
         }
-        else if(shotField)
-    }
-
+        catch(IndexOutOfBoundsException err){}
+        
+        return false;
+    }    
+    
     public boolean allAreSunken() {
         return (hitFields == occupiedFields);
     } 
