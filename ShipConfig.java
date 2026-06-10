@@ -1,8 +1,8 @@
 public class ShipConfig {
-  final byte length;
-  final byte amount;
+  final int length;
+  final int amount;
 
-  public ShipConfig(Byte length, Byte amount) {
+  public ShipConfig(int length, int amount) {
     this.length = length;
     this.amount = amount;
   }
