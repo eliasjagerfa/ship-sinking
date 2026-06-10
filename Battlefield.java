@@ -1,29 +1,25 @@
 public class Battlefield {
-    final byte width;
-    final byte height;
+    final int width;
+    final int height;
     final byte[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit
     private byte occupiedFields;
     private byte hitFields;
 
-    public Battlefield(byte width, byte height) {
+    public Battlefield(int width, int height) {
         this.width = width;
         this.height = height;
         this.coordinateSystem = new byte[height][width];
     }
 
     public boolean setShip(Ship ship) {
-        for(int i = 0; i < 2; i++) { 
-            try{
-                if(i == 0) {
-                    
-                }   
-                else {
-
-                } 
-            }
-            catch(IndexOutOfBoundsException err) {return false;}
-        }
+        boolean isInBounds = ship.x <= width || ship.y <= height;
         
+        if(isInBounds) {
+            for(byte position : ship.getPositions()) {
+                
+            }
+        } 
+        return isInBounds;
     }
     public boolean hitField(byte x, byte y) {
         try{
