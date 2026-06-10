@@ -16,7 +16,12 @@ public class Battlefield {
         
         if(isInBounds) {
             for(byte position : ship.getPositions()) {
-                
+                if(ship.isHorizontal) {
+                    coordinateSystem[position][ship.y] = 2;
+                }
+                else {
+                    coordinateSystem[ship.x][position] = 2;
+                }
             }
         } 
         return isInBounds;
