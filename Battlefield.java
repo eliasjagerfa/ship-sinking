@@ -13,26 +13,31 @@ public class Battlefield {
 
     public boolean setShip(Ship ship) {
         boolean isInBounds = ship.x <= width || ship.y <= height;
-        
-        if(isInBounds) {
-            for(byte position : ship.getPositions()) {
-                isInBounds = ship.isHorizontal 
-                    ? position <= width 
-                    : position <= height;
-                    
-                boolean isOverlapping = ship.isHorizontal 
-                    ? coordinateSystem[position][ship.y] == 2 
-                    : coordinateSystem[ship.x][position] == 2;
+        boolean isOverlapping = false;
 
-                if(!isInBounds || isOverlapping){
-                   break; 
-                }
-                
-                if(ship.isHorizontal) {
-                    coordinateSystem[position][ship.y] = 2;
-                }
-                else {
-                    coordinateSystem[ship.x][position] = 2;
+        if(isInBounds) {
+            for(byte i = 0; i < 2; i++) {
+                for(byte position : ship.getPositions()) {
+                    if(i == 0) {
+                        isInBounds = ship.isHorizontal 
+                            ? position <= width 
+                            : position <= height;
+
+                        isOverlapping = ship.isHorizontal 
+                            ? coordinateSystem[position][ship.y] == 2 
+                            : coordinateSystem[ship.x][position] == 2;
+                    }
+                    else if(!isInBounds || isOverlapping){
+                    break; 
+                    }
+                    else {
+                        if(ship.isHorizontal) {
+                            coordinateSystem[position][ship.y] = 2;
+                        }
+                        else {
+                            coordinateSystem[ship.x][position] = 2;
+                        }
+                    }
                 }
             }
         } 
