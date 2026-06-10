@@ -1,6 +1,8 @@
 import static java.lang.System.out;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Game {
   final int width;
@@ -8,7 +10,6 @@ public class Game {
   private Battlefield player1Battlefield;
   private Battlefield player2Battlefield;
   private boolean isPlayerOneTurn;
-  private boolean isPhaseOne;
   private final Scanner scanner;
   private final ArrayList<ShipConfig> shipConfigs;
   private Integer totalShipsToPlace  = 0;
@@ -20,7 +21,6 @@ public class Game {
     this.player1Battlefield = new Battlefield(width, height);
     this.player2Battlefield = new Battlefield(width, height);
     this.isPlayerOneTurn = true;
-    this.isPhaseOne = true;
     this.scanner = new Scanner(System.in);
     this.shipConfigs = shipConfigs;
 
@@ -33,7 +33,6 @@ public class Game {
     this.player1Battlefield = new Battlefield(width, height);
     this.player2Battlefield = new Battlefield(width, height);
     this.isPlayerOneTurn = true;
-    this.isPhaseOne = true;
   }
 
   public void closeScanner() {
@@ -49,9 +48,58 @@ public class Game {
       scanner.nextLine();
 
       Integer shipsPlaced = 0;
+      Integer shipsPlacedBefore = 0;
 
-      while (totalShipsToPlace != shipsPlaced) { 
-          
+
+      out.println("You can now place ships on your battlefield. (if you dont know how to place ships, type 'help')");
+
+      while (!totalShipsToPlace.equals(shipsPlaced)) {
+        if(!shipsPlacedBefore.equals(shipsPlaced)) {
+          out.println("Ship placed successfully");
+          out.println("You have " + (totalShipsToPlace - shipsPlaced) + " left to place\n");
+          shipsPlacedBefore = shipsPlaced;
+        }
+
+        String input = scanner.nextLine().toLowerCase();
+
+        if (input.equals("help")) {
+          out.println("To place a ship, type in the following format: 'x y length orientation'");
+          out.println("x and y are the coordinates of the starting point of the ship, length is the length of the ship and orientation is either 'h' for horizontal or 'v' for vertical");
+          out.println("Example: '0 0 3 h' would place a ship of length 3 horizontally starting at the bottom left corner of the battlefield");
+          out.println("You can only place ships within the bounds of the battlefield and they cannot overlap\n");
+          continue;
+        }
+
+        Pattern pattern = Pattern.compile("^(\\d+) (\\d+) (\\d+) ([hv])$");
+        Matcher matcher = pattern.matcher(input.trim());
+
+        if (matcher.matches()) {
+          // TODO: add proper input validation. as an example dont allow negative or 0 values, aswell as ones going out of length
+          int x = Integer.parseInt(matcher.group(1));
+          int y = Integer.parseInt(matcher.group(2));
+          int length = Integer.parseInt(matcher.group(3));
+          String rotation = matcher.group(4);
+
+          Ship newShip = new Ship(x, y, length, rotation.equals("h"));
+
+          boolean isShipPlaced;
+
+          if (i == 0) {
+            isShipPlaced = player1Battlefield.setShip(newShip);
+          } else {
+            isShipPlaced = player2Battlefield.setShip(newShip);
+          }
+
+          if (isShipPlaced) {
+            shipsPlaced++;
+          } else {
+            // TODO: add better error handling
+            out.println("Ship couldnt be placed. Try again!");
+          }
+
+        } else {
+          out.println("Wrong command, try again\n");
+        }
       }
 
       out.println("All ships sucessfully placed");
