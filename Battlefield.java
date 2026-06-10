@@ -16,6 +16,18 @@ public class Battlefield {
         
         if(isInBounds) {
             for(byte position : ship.getPositions()) {
+                isInBounds = ship.isHorizontal 
+                    ? position <= width 
+                    : position <= height;
+                    
+                boolean isOverlapping = ship.isHorizontal 
+                    ? coordinateSystem[position][ship.y] == 2 
+                    : coordinateSystem[ship.x][position] == 2;
+
+                if(!isInBounds || isOverlapping){
+                   break; 
+                }
+                
                 if(ship.isHorizontal) {
                     coordinateSystem[position][ship.y] = 2;
                 }
