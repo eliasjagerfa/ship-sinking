@@ -10,6 +10,9 @@ public class Game {
   private boolean isPlayerOneTurn;
   private boolean isPhaseOne;
   private final Scanner scanner;
+  private final ArrayList<ShipConfig> shipConfigs;
+  private Integer totalShipsToPlace  = 0;
+
 
   public Game(int width, int height, ArrayList<ShipConfig> shipConfigs) {
     this.width = width;
@@ -19,6 +22,11 @@ public class Game {
     this.isPlayerOneTurn = true;
     this.isPhaseOne = true;
     this.scanner = new Scanner(System.in);
+    this.shipConfigs = shipConfigs;
+
+    shipConfigs.forEach((sc) -> {
+      totalShipsToPlace += sc.amount;
+    });
   }
 
   public void restartGame() {
@@ -32,6 +40,26 @@ public class Game {
     scanner.close();
   }
 
+  public void startShipPlacement() {
+    for (int i = 0; i < 2; i++) {
+      String currentPlayer = i == 0 ? "1" : "2";
+
+      out.println("Please hand the device to Player " + currentPlayer);
+      out.println("Press any key to continue");
+      scanner.nextLine();
+
+      Integer shipsPlaced = 0;
+
+      while (totalShipsToPlace != shipsPlaced) { 
+          
+      }
+
+      out.println("All ships sucessfully placed");
+    }
+    
+    isPlayerOneTurn = true;
+  }
+
   public void startTurn() {
     // TODO: Later make this an attribute to define the players display name
     String currentPlayer = isPlayerOneTurn ? "1" : "2";
@@ -41,12 +69,6 @@ public class Game {
     out.println("Press any key to continue");
     scanner.nextLine();
 
-    // check which phase is currently running
-    if (isPhaseOne) {
-
-    } else {
-
-    }
 
     isPlayerOneTurn = !isPlayerOneTurn;
     return;
