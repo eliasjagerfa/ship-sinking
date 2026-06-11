@@ -13,10 +13,10 @@ public class Ship {
     this.isHorizontal = isHorizontal;
   }
 
-  public byte[] getPositions() {
-    byte[] positions = new byte[length];
+  public int[] getPositions() {
+    int[] positions = new int[length];
     IntStream.range(0, length)
-            .forEach(i -> positions[i] = (byte)(isHorizontal ? x + i : y + i));
+            .forEach(i -> positions[i] = (int)(isHorizontal ? x + i : y + i));
     return positions;
   }
 }

@@ -12,7 +12,7 @@ public class Game {
   private boolean isPlayerOneTurn;
   private final Scanner scanner;
   private final ArrayList<ShipConfig> shipConfigs;
-  private Integer totalShipsToPlace  = 0; //int reicht glaube ich schon?
+  private int totalShipsToPlace  = 0; //int reicht glaube ich schon?
 
 
   public Game(int width, int height, ArrayList<ShipConfig> shipConfigs) {
@@ -47,16 +47,16 @@ public class Game {
       out.println("Press enter to continue");
       scanner.nextLine();
 
-      Integer shipsPlaced = 0; //int reicht doch?
-      Integer shipsPlacedBefore = 0; //int reicht doch?
+      int shipsPlaced = 0; //int reicht doch?
+      int shipsPlacedBefore = 0; //int reicht doch?
 
 
       out.println("You can now place ships on your battlefield. (if you dont know how to place ships, type 'help')");
 
       //TODO: Falls wir uns auf CLI konzentrieren, wäre ein "gebe die Schiffspositionen an: " glaube ganz gut
-      while (!totalShipsToPlace.equals(shipsPlaced)) {
+      while (totalShipsToPlace != shipsPlaced) {
         out.print("Enter your ships position: ");
-        if(!shipsPlacedBefore.equals(shipsPlaced)) {
+        if(shipsPlacedBefore != shipsPlaced) {
           out.println("Ship placed successfully");
           out.println("You have " + (totalShipsToPlace - shipsPlaced) + " left to place\n");
           shipsPlacedBefore = shipsPlaced;
