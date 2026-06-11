@@ -44,7 +44,7 @@ public class Game {
       String currentPlayer = i == 0 ? "1" : "2";
 
       out.println("Please hand the device to Player " + currentPlayer);
-      out.println("Press any key to continue"); //eigentlich funktioniert NUR enter, nicht any key --> misleading
+      out.println("Press enter to continue");
       scanner.nextLine();
 
       Integer shipsPlaced = 0; //int reicht doch?
@@ -53,17 +53,17 @@ public class Game {
 
       out.println("You can now place ships on your battlefield. (if you dont know how to place ships, type 'help')");
 
-      //Falls wir uns auf CLI konzentrien, wäre ein "gebe die Schiffspositionen an: " glaube ganz gut
+      //TODO: Falls wir uns auf CLI konzentrieren, wäre ein "gebe die Schiffspositionen an: " glaube ganz gut
       while (!totalShipsToPlace.equals(shipsPlaced)) {
+        out.print("Enter your ships position: ");
         if(!shipsPlacedBefore.equals(shipsPlaced)) {
           out.println("Ship placed successfully");
           out.println("You have " + (totalShipsToPlace - shipsPlaced) + " left to place\n");
           shipsPlacedBefore = shipsPlaced;
         }
 
-        String input = scanner.nextLine().toLowerCase();
+        String input = scanner.nextLine().toLowerCase().trim();
 
-        //input.trim() würde mehr Sinn machen
         if (input.equals("help")) {
           out.println("To place a ship, type in the following format: 'x y length orientation'");
           out.println("x and y are the coordinates of the starting point of the ship, length is the length of the ship and orientation is either 'h' for horizontal or 'v' for vertical");
@@ -73,7 +73,7 @@ public class Game {
         }
 
         Pattern pattern = Pattern.compile("^(\\d+) (\\d+) (\\d+) ([hv])$");
-        Matcher matcher = pattern.matcher(input.trim());
+        Matcher matcher = pattern.matcher(input);
 
         if (matcher.matches()) {
           // TODO: add proper input validation. as an example dont allow negative or 0 values, aswell as ones going out of length
@@ -121,6 +121,6 @@ public class Game {
 
 
     isPlayerOneTurn = !isPlayerOneTurn;
-    return; //bei void kein return?
+    return;
   }
 }
