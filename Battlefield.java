@@ -1,7 +1,7 @@
 public class Battlefield {
     final int width;
     final int height;
-    final byte[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit
+    final byte[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit //PRÜFEN: int, damit das Spielfeld größer werden kann? Was ist mit Overflow? 
     private byte occupiedFields;
     private byte hitFields;
 
@@ -12,36 +12,32 @@ public class Battlefield {
     }
 
     public boolean setShip(Ship ship) {
-        boolean isInBounds = ship.x <= width || ship.y <= height;
-        boolean isOverlapping = false;
+        for(byte i = 0; i < 2; i++) {
+            for(byte position : ship.getPositions()) {
+                if(i == 0) {
+                    boolean isInBounds = ship.isHorizontal 
+                        ? position <= width && position >= 0
+                        : position <= height && position >= 0;
 
-        if(isInBounds) {
-            for(byte i = 0; i < 2; i++) {
-                for(byte position : ship.getPositions()) {
-                    if(i == 0) {
-                        isInBounds = ship.isHorizontal 
-                            ? position <= width 
-                            : position <= height;
+                    boolean isOverlapping = ship.isHorizontal 
+                        ? coordinateSystem[position][ship.y] == 2 
+                        : coordinateSystem[ship.x][position] == 2;
 
-                        isOverlapping = ship.isHorizontal 
-                            ? coordinateSystem[position][ship.y] == 2 
-                            : coordinateSystem[ship.x][position] == 2;
+                    if(!isInBounds || isOverlapping){
+                        return false; 
                     }
-                    else if(!isInBounds || isOverlapping){
-                    break; 
+                } 
+                else {
+                    if(ship.isHorizontal) {
+                        coordinateSystem[position][ship.y] = 2;
                     }
                     else {
-                        if(ship.isHorizontal) {
-                            coordinateSystem[position][ship.y] = 2;
-                        }
-                        else {
-                            coordinateSystem[ship.x][position] = 2;
-                        }
+                        coordinateSystem[ship.x][position] = 2;
                     }
                 }
             }
-        } 
-        return isInBounds;
+        }
+        return true;
     }
     public boolean hitField(byte x, byte y) {
         try{

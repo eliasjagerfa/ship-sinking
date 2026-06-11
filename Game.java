@@ -12,7 +12,7 @@ public class Game {
   private boolean isPlayerOneTurn;
   private final Scanner scanner;
   private final ArrayList<ShipConfig> shipConfigs;
-  private Integer totalShipsToPlace  = 0;
+  private Integer totalShipsToPlace  = 0; //int reicht glaube ich schon?
 
 
   public Game(int width, int height, ArrayList<ShipConfig> shipConfigs) {
@@ -44,15 +44,16 @@ public class Game {
       String currentPlayer = i == 0 ? "1" : "2";
 
       out.println("Please hand the device to Player " + currentPlayer);
-      out.println("Press any key to continue");
+      out.println("Press any key to continue"); //eigentlich funktioniert NUR enter, nicht any key --> misleading
       scanner.nextLine();
 
-      Integer shipsPlaced = 0;
-      Integer shipsPlacedBefore = 0;
+      Integer shipsPlaced = 0; //int reicht doch?
+      Integer shipsPlacedBefore = 0; //int reicht doch?
 
 
       out.println("You can now place ships on your battlefield. (if you dont know how to place ships, type 'help')");
 
+      //Falls wir uns auf CLI konzentrien, wäre ein "gebe die Schiffspositionen an: " glaube ganz gut
       while (!totalShipsToPlace.equals(shipsPlaced)) {
         if(!shipsPlacedBefore.equals(shipsPlaced)) {
           out.println("Ship placed successfully");
@@ -62,6 +63,7 @@ public class Game {
 
         String input = scanner.nextLine().toLowerCase();
 
+        //input.trim() würde mehr Sinn machen
         if (input.equals("help")) {
           out.println("To place a ship, type in the following format: 'x y length orientation'");
           out.println("x and y are the coordinates of the starting point of the ship, length is the length of the ship and orientation is either 'h' for horizontal or 'v' for vertical");
@@ -119,6 +121,6 @@ public class Game {
 
 
     isPlayerOneTurn = !isPlayerOneTurn;
-    return;
+    return; //bei void kein return?
   }
 }
