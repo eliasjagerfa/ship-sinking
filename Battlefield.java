@@ -1,7 +1,7 @@
 public class Battlefield {
     final int width;
     final int height;
-    final int[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit //PRÜFEN: int, damit das Spielfeld größer werden kann? Was ist mit Overflow? 
+    final int[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit //PRÜFEN: Was ist mit Overflow? 
     private int occupiedFields;
     private int hitFields;
 
