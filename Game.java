@@ -12,6 +12,7 @@ public class Game {
   private Battlefield player2Battlefield;
   private boolean isPlayerOneTurn;
   private final Scanner scanner;
+  // TODO: think about if we need shipConfigs anymore or if we delete it and only use the shipsToPlace hashmap, which is basically the same but without the ShipConfig class, which is basically just a wrapper for the length and amount of ships
   private final ArrayList<ShipConfig> shipConfigs;
   private int totalShipsToPlace  = 0;
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
@@ -67,6 +68,9 @@ public class Game {
 
         String input = scanner.nextLine().toLowerCase().trim();
 
+        // TODO: add a command to show which ships are left to place and how many of each size, which can be done by printing the shipsLeftToPlace hashmap in a nice format, which would be helpful for the user to keep track of which ships they have already placed and which ones they still have to place
+        // Additionally after a ship has been placed successfully, it would be nice to say which ship has been placed and how many of that length are left
+        // But you could also make it print automatically after every successful ship placement, although this might be a bit too much information for the user, so maybe only print it when the user types a command like "status" or something like that
         if (input.equals("help")) {
           out.println("To place a ship, type in the following format: 'x y length orientation'");
           out.println("x and y are the coordinates of the starting point of the ship, length is the length of the ship and orientation is either 'h' for horizontal or 'v' for vertical");
@@ -80,6 +84,8 @@ public class Game {
 
         //TODO: add validator for battlefield size
         if (matcher.matches()) {
+          // TODO: please outsource some logic of this if statement into a variable, as it is pretty hard to read right now
+          // The reason for that is that when looking at an if statement, you want to understand the condition right away, but with the current implementation, you have to read through the whole if statement to understand what it does, which makes it harder to read and understand the code
           if (shipsLeftToPlace.getOrDefault(Integer.valueOf(matcher.group(3)), 0) > 0) {
             int x = Integer.parseInt(matcher.group(1));
             int y = Integer.parseInt(matcher.group(2));
