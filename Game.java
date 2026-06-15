@@ -44,7 +44,6 @@ public class Game {
   }
 
   public void startShipPlacement() {
-    //TODO: add a validator for the shipConfigs
     for (int i = 0; i < 2; i++) {
       String currentPlayer = i == 0 ? "1" : "2";
 
