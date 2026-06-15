@@ -12,8 +12,6 @@ public class Game {
   private Battlefield player2Battlefield;
   private boolean isPlayerOneTurn;
   private final Scanner scanner;
-  // TODO: think about if we need shipConfigs anymore or if we delete it and only use the shipsToPlace hashmap, which is basically the same but without the ShipConfig class, which is basically just a wrapper for the length and amount of ships
-  private final ArrayList<ShipConfig> shipConfigs;
   private int totalShipsToPlace  = 0;
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
 
@@ -25,7 +23,6 @@ public class Game {
     this.player2Battlefield = new Battlefield(width, height);
     this.isPlayerOneTurn = true;
     this.scanner = new Scanner(System.in);
-    this.shipConfigs = shipConfigs;
 
     shipConfigs.forEach((sc) -> {
       totalShipsToPlace += sc.amount;
@@ -83,12 +80,11 @@ public class Game {
 
         //TODO: add validator for battlefield size
         if (matcher.matches()) {
-          // TODO: please outsource some logic of this if statement into a variable, as it is pretty hard to read right now
-          // The reason for that is that when looking at an if statement, you want to understand the condition right away, but with the current implementation, you have to read through the whole if statement to understand what it does, which makes it harder to read and understand the code
-          if (shipsLeftToPlace.getOrDefault(Integer.valueOf(matcher.group(3)), 0) > 0) {
+          int length = Integer.parseInt(matcher.group(3));
+          int amountShipOfLength = shipsLeftToPlace.getOrDefault(length, 0);
+          if (amountShipOfLength > 0) {
             int x = Integer.parseInt(matcher.group(1));
             int y = Integer.parseInt(matcher.group(2));
-            int length = Integer.parseInt(matcher.group(3));
             String rotation = matcher.group(4);
             Ship newShip = new Ship(x, y, length, rotation.equals("h"));
             boolean isShipPlaced;
