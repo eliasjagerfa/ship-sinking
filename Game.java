@@ -116,7 +116,17 @@ public class Game {
     isPlayerOneTurn = true;
   }
 
-  public void startTurn() {
+  public void startGame() {
+    while(isPlayerOneTurn ? !player1Battlefield.allAreSunken() : !player2Battlefield.allAreSunken()){
+      startTurn();
+    }
+
+    String winner = isPlayerOneTurn ? "2" : "1";
+    out.print("Player " + winner + " has won!");
+    restartGame();
+  }
+
+  public boolean startTurn() {
     // TODO: Later make this an attribute to define the players display name
     String currentPlayer = isPlayerOneTurn ? "1" : "2";
 
@@ -125,8 +135,8 @@ public class Game {
     out.println("Press enter to continue");
     scanner.nextLine();
 
-
+    //TODO: Only have this happen if the turn was actually valid and the player didnt hit any ship
     isPlayerOneTurn = !isPlayerOneTurn;
-    return;
+    return false;
   }
 }

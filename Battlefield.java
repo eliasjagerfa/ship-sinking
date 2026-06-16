@@ -30,8 +30,10 @@ public class Battlefield {
                 } else {
                     if(ship.isHorizontal) {
                         coordinateSystem[position][ship.y] = 2;
+                        occupiedFields++;
                     } else {
                         coordinateSystem[ship.x][position] = 2;
+                        occupiedFields++;
                     }
                 }
             }
@@ -43,6 +45,7 @@ public class Battlefield {
             int shotField = coordinateSystem[x][y];
             if(shotField == 0 || shotField == 2) {
                 coordinateSystem[x][y]++;
+                hitFields += shotField == 2 ? 1 : 0;
                 return true;
             }
         }
