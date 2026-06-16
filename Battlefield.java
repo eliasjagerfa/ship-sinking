@@ -1,14 +1,20 @@
+import java.util.Arrays;
+
 public class Battlefield {
     final int width;
     final int height;
-    private final int[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit //PRÜFEN: Was ist mit Overflow? 
+    private final String[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit //PRÜFEN: Was ist mit Overflow? 
     private int occupiedFields;
-    private int hitFields;
+    private int ShipHitFields;
 
     public Battlefield(int width, int height) {
         this.width = width;
         this.height = height;
-        this.coordinateSystem = new int[height][width];
+        this.coordinateSystem = new String[height][width];
+        for(String[] row : coordinateSystem){
+            Arrays.fill(row, "isFree");
+        }
+        
     }
 
 
@@ -21,18 +27,18 @@ public class Battlefield {
                         : position <= height && position >= 0;
 
                     boolean isOverlapping = ship.isHorizontal 
-                        ? coordinateSystem[position][ship.y] == 2 
-                        : coordinateSystem[ship.x][position] == 2;
+                        ? coordinateSystem[position][ship.y].equals("isOccupied") 
+                        : coordinateSystem[ship.x][position].equals("isOccupied");
 
                     if(!isInBounds || isOverlapping){
                         return false; 
                     }
                 } else {
                     if(ship.isHorizontal) {
-                        coordinateSystem[position][ship.y] = 2;
+                        coordinateSystem[position][ship.y] = "isOccupied";
                         occupiedFields++;
                     } else {
-                        coordinateSystem[ship.x][position] = 2;
+                        coordinateSystem[ship.x][position] = "isOccupied";
                         occupiedFields++;
                     }
                 }
@@ -42,10 +48,10 @@ public class Battlefield {
     }
     public boolean hitField(int x, int y) {
         try{
-            int shotField = coordinateSystem[x][y];
-            if(shotField == 0 || shotField == 2) {
-                coordinateSystem[x][y]++;
-                hitFields += shotField == 2 ? 1 : 0;
+            String shotField = coordinateSystem[x][y];
+            if(shotField.equals("isFree") || shotField.equals("isOccupied")) {
+                coordinateSystem[x][y] = shotField.equals("isFree") ? "isEmptyHit" : "isShipHit";
+                ShipHitFields += shotField.equals("isFree") ? 0 : 1;
                 return true;
             }
         }
@@ -55,6 +61,6 @@ public class Battlefield {
     }   
     
     public boolean allAreSunken() {
-        return (hitFields == occupiedFields);
+        return (ShipHitFields == occupiedFields);
     } 
 }
