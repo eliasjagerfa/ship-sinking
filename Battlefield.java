@@ -14,43 +14,42 @@ public class Battlefield {
         for(String[] row : coordinateSystem){
             Arrays.fill(row, "isFree");
         }
-        
     }
 
+    public void setShip(Ship ship, int shipNumber) {
+        for(int position : ship.getPositions()) {
+            if(ship.isHorizontal) {
+                coordinateSystem[position][ship.y] = String.format("%d", shipNumber);
+                occupiedFields++;
+            } else {
+                coordinateSystem[ship.x][position] = String.format("%d", shipNumber);
+                occupiedFields++;
+            }
+        }
+    }
 
-    public boolean setShip(Ship ship) {
-        for(int i = 0; i < 2; i++) {
-            for(int position : ship.getPositions()) {
-                if(i == 0) {
-                    boolean isInBounds = ship.isHorizontal 
-                        ? position <= width && position >= 0
-                        : position <= height && position >= 0;
+    public boolean areShipPositionsValid(Ship ship) {
+        for(int position : ship.getPositions()) {
+            boolean isInBounds = ship.isHorizontal 
+                ? position <= width && position >= 0
+                : position <= height && position >= 0;
 
-                    boolean isOverlapping = ship.isHorizontal 
-                        ? coordinateSystem[position][ship.y].equals("isOccupied") 
-                        : coordinateSystem[ship.x][position].equals("isOccupied");
+            boolean isOverlapping = ship.isHorizontal 
+                ? parseShipId(coordinateSystem[position][ship.y]) >= 0
+                : parseShipId(coordinateSystem[ship.x][position]) >= 0;
 
-                    if(!isInBounds || isOverlapping){
-                        return false; 
-                    }
-                } else {
-                    if(ship.isHorizontal) {
-                        coordinateSystem[position][ship.y] = "isOccupied";
-                        occupiedFields++;
-                    } else {
-                        coordinateSystem[ship.x][position] = "isOccupied";
-                        occupiedFields++;
-                    }
-                }
+            if(!isInBounds || isOverlapping) {
+                return false;
             }
         }
         return true;
     }
+
     public boolean hitField(int x, int y) {
         try{
             String shotField = coordinateSystem[x][y];
-            if(shotField.equals("isFree") || shotField.equals("isOccupied")) {
-                coordinateSystem[x][y] = shotField.equals("isFree") ? "isEmptyHit" : "isShipHit";
+            if(shotField.equals("isFree") || parseShipId(shotField) >= 0) {
+                coordinateSystem[x][y] = shotField.equals("isFree") ? "isEmptyHit" : ("isShipHit_" + shotField);
                 ShipHitFields += shotField.equals("isFree") ? 0 : 1;
                 return true;
             }
@@ -62,5 +61,13 @@ public class Battlefield {
     
     public boolean allAreSunken() {
         return (ShipHitFields == occupiedFields);
-    } 
+    }
+
+    private int parseShipId(String coordinateSystemValue) {
+        try {
+            return Integer.parseInt(coordinateSystemValue);
+        } catch (NumberFormatException err) {
+            return -1;
+        }
+    }
 }

@@ -13,6 +13,7 @@ public class Game {
   private boolean isPlayerOneTurn;
   private final Scanner scanner;
   private int totalShipsToPlace  = 0;
+  private final ArrayList<int[]>[] shipsPositions;
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
 
 
@@ -28,6 +29,11 @@ public class Game {
       totalShipsToPlace += sc.amount;
       shipsToPlace.put(sc.length, shipsToPlace.getOrDefault(sc.length, 0) + sc.amount);
     });
+
+    this.shipsPositions = new ArrayList[shipsToPlace.size()];
+    for (int i = 0; i < shipsPositions.length; i++) {
+      shipsPositions[i] = new ArrayList<>();
+    }
   }
 
   public void restartGame() {
@@ -87,20 +93,18 @@ public class Game {
             int y = Integer.parseInt(matcher.group(2));
             String rotation = matcher.group(4);
             Ship newShip = new Ship(x, y, length, rotation.equals("h"));
-            boolean isShipPlaced;
 
-            if (i == 0) {
-              isShipPlaced = player1Battlefield.setShip(newShip);
-            } else {
-              isShipPlaced = player2Battlefield.setShip(newShip);
-            }
-
-            if (isShipPlaced) {
+            if( i == 0 ? player1Battlefield.areShipPositionsValid(newShip) : player2Battlefield.areShipPositionsValid(newShip)) {
+              if(i == 0) {
+                player1Battlefield.setShip(newShip, shipsPlaced);
+              } else {
+                player2Battlefield.setShip(newShip, shipsPlaced);
+              }
               shipsPlaced++;
               shipsLeftToPlace.merge(length, -1, Integer::sum);
             } else {
               // TODO: add better error handling
-              out.println("Ship couldnt be placed. Try again!");
+              out.println("Ship goes outside the battlefield. Try again!");
             }
           } else {
             out.println("No ships of this size can be placed\n");
@@ -109,7 +113,6 @@ public class Game {
           out.println("Wrong command, try again\n");
         }
       }
-
       out.println("All ships sucessfully placed");
     }
     
