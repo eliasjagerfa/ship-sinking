@@ -50,15 +50,15 @@ public class Battlefield {
             String shotField = coordinateSystem[x][y];
             if(shotField.equals("isFree") || parseShipId(shotField) >= 0) {
                 coordinateSystem[x][y] = shotField.equals("isFree") ? "emptyHit" : ("isShipHit_" + shotField);
-                ShipHitFields += shotField.equals("isFree") ? 0 : 1;
-                String hitType = coordinateSystem[x][y];
-                return hitType;
+                ShipHitFields += shotField.equals("emptyHit") ? 0 : 1;
+                return coordinateSystem[x][y];
             }
         }
         catch(IndexOutOfBoundsException err){
             System.out.println("Invalid Coordinates. Try again!");
             return "outOfBounds";
         }
+        System.out.println("You already shot at these coordinates");
         return "alreadyShotAt";
     }   
     

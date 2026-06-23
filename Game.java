@@ -49,7 +49,6 @@ public class Game {
   public void startShipPlacement() {
     for (int i = 0; i < 2; i++) {
       String currentPlayer = i == 0 ? "1" : "2";
-
       out.println("Please hand the device to Player " + currentPlayer);
       out.println("Press enter to continue");
       scanner.nextLine();
@@ -126,16 +125,17 @@ public class Game {
 
   public void startGame() {
     while(true){
-      doTurn();
-      //TODO: Breakcondition setzen
+      boolean isOver = doTurn();
+      if (isOver) { break; }
+      //TODO: Breakcondition is missing me boy
     }
 
-    String winner = isPlayerOneTurn ? "2" : "1";
+    String winner = isPlayerOneTurn ? "1" : "2";
     out.print("Player " + winner + " has won!");
     restartGame();
   }
 
-  public void doTurn() {
+  public boolean doTurn() {
     //TODO: Later make this an attribute to define the players display name 
     String currentPlayer = isPlayerOneTurn ? "1" : "2";
       
@@ -152,22 +152,29 @@ public class Game {
         out.println("The format is as follows 'x y'");
         out.println("Example: You want to shoot at the field with x:1 y:1, then you just type '1 1'");
         out.println("Type the coordinates that you want to hit: ");
-        input = scanner.nextLine();
+        input = scanner.nextLine().trim();
       }
       
       Pattern pattern = Pattern.compile("^(\\d+) (\\d+)$");
       Matcher matcher = pattern.matcher(input);
       if(matcher.matches()){
         out.println("You shot at " + input + "*drumroll please*");
-        int x = Integer.parseInt(input.split("")[0]);
-        int y = Integer.parseInt(input.split("")[1]);
-        String hitType = isPlayerOneTurn ? player1Battlefield.hitField(x, y) : player2Battlefield.hitField(x, y);
+        int x = Integer.parseInt(matcher.group(1));
+        int y = Integer.parseInt(matcher.group(2));
+        String result = isPlayerOneTurn ? player1Battlefield.hitField(x, y) : player2Battlefield.hitField(x, y);
 
-        //TODO: Continue logic pls
-        if(hitType.equals("emptyHit")) {
+        if(result.equals("emptyHit")) {
           out.println("but no ship got hit");
           isPlayerOneTurn = !isPlayerOneTurn;
-          break;
+          return false;
+        } else if (result.contains("isShipHit")) {
+          out.println("and hit a ship!");
+          if(isPlayerOneTurn) {
+            if (player1Battlefield.allAreSunken()) { return true; }
+          } else {
+            if (player2Battlefield.allAreSunken()) { return true; }
+          }
+          return false;
         }
       } else {
         out.println("Invalid Command. Try again!");
