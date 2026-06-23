@@ -5,7 +5,7 @@ public class Battlefield {
     final int width;
     final int height;
     private final String[][] coordinateSystem;
-    private int ShipHitFields;
+    private int shipHitFields;
     private int occupiedFields;
     private final ArrayList<int[]>[] calculatedShipsPositions;
 
@@ -59,10 +59,18 @@ public class Battlefield {
     public String hitField(int x, int y) {
         try{
             String shotField = coordinateSystem[x][y];
-            if(shotField.equals("isFree") || parseShipId(shotField) >= 0) {
-                coordinateSystem[x][y] = shotField.equals("isFree") ? "emptyHit" : ("isShipHit_" + shotField);
-                ShipHitFields += shotField.equals("emptyHit") ? 0 : 1;
-                return coordinateSystem[x][y];
+                
+            if(shotField.equals("isFree")) {
+                coordinateSystem[x][y] = "emptyHit";
+
+                return "emptyHit";
+            } else if(parseShipId(shotField) >= 0) {
+                String newFieldValue = "isShipHit_" + shotField;
+                
+                coordinateSystem[x][y] = newFieldValue;
+                shipHitFields++;
+
+                return newFieldValue;
             }
         }
         catch(IndexOutOfBoundsException err){
@@ -74,7 +82,7 @@ public class Battlefield {
     }   
     
     public boolean allAreSunken() {
-        return (ShipHitFields == occupiedFields);
+        return (shipHitFields == occupiedFields);
     }
 
     private int parseShipId(String coordinateSystemValue) {
