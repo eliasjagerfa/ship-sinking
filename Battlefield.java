@@ -1,31 +1,42 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Battlefield {
     final int width;
     final int height;
-    private final String[][] coordinateSystem; //0 is free, 1 is already shot at, 2 is occupied, 3 is hit //PRÜFEN: Was ist mit Overflow? 
+    private final String[][] coordinateSystem;
+    private int shipHitFields;
     private int occupiedFields;
-    private int ShipHitFields;
+    private final ArrayList<int[]>[] calculatedShipsPositions;
 
-    public Battlefield(int width, int height) {
+    public Battlefield(int width, int height, int shipsToPlace) {
         this.width = width;
         this.height = height;
         this.coordinateSystem = new String[height][width];
         for(String[] row : coordinateSystem){
-            Arrays.fill(row, "isFree");
+            Arrays.fill(row, "free");
+        }
+
+        this.calculatedShipsPositions = new ArrayList[shipsToPlace];
+        for (int i = 0; i < calculatedShipsPositions.length; i++) {
+            calculatedShipsPositions[i] = new ArrayList<>();
         }
     }
 
-    public void setShip(Ship ship, int shipNumber) {
+    public void setShip(Ship ship, int shipId) {
+        ArrayList<int[]> csps = new ArrayList(ship.length);
         for(int position : ship.getPositions()) {
             if(ship.isHorizontal) {
-                coordinateSystem[position][ship.y] = String.format("%d", shipNumber);
+                coordinateSystem[position][ship.y] = String.format("%d", shipId);
                 occupiedFields++;
+                csps.add(new int[] {ship.x, position});
             } else {
-                coordinateSystem[ship.x][position] = String.format("%d", shipNumber);
+                coordinateSystem[ship.x][position] = String.format("%d", shipId);
                 occupiedFields++;
+                csps.add(new int[] {position, ship.y});
             }
         }
+        calculatedShipsPositions[shipId] = csps;
     }
 
     public boolean areShipPositionsValid(Ship ship) {
@@ -48,10 +59,18 @@ public class Battlefield {
     public String hitField(int x, int y) {
         try{
             String shotField = coordinateSystem[x][y];
-            if(shotField.equals("isFree") || parseShipId(shotField) >= 0) {
-                coordinateSystem[x][y] = shotField.equals("isFree") ? "emptyHit" : ("isShipHit_" + shotField);
-                ShipHitFields += shotField.equals("emptyHit") ? 0 : 1;
-                return coordinateSystem[x][y];
+                
+            if(shotField.equals("free")) {
+                coordinateSystem[x][y] = "emptyHit";
+
+                return "emptyHit";
+            } else if(parseShipId(shotField) >= 0) {
+                String newFieldValue = "shipHit_" + shotField;
+                
+                coordinateSystem[x][y] = newFieldValue;
+                shipHitFields++;
+
+                return newFieldValue;
             }
         }
         catch(IndexOutOfBoundsException err){
@@ -63,7 +82,7 @@ public class Battlefield {
     }   
     
     public boolean allAreSunken() {
-        return (ShipHitFields == occupiedFields);
+        return (shipHitFields == occupiedFields);
     }
 
     private int parseShipId(String coordinateSystemValue) {

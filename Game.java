@@ -165,7 +165,7 @@ public class Game {
           out.println("but no ship got hit");
           isPlayerOneTurn = !isPlayerOneTurn;
           return false;
-        } else if (result.contains("isShipHit")) {
+        } else if (result.contains("shipHit")) {
           out.println("and hit a ship!");
           if(isPlayerOneTurn) {
             if (player1Battlefield.allAreSunken()) { return true; }
