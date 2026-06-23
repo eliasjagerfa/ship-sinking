@@ -12,16 +12,13 @@ public class Game {
   private Battlefield player2Battlefield;
   private boolean isPlayerOneTurn;
   private final Scanner scanner;
-  private int totalShipsToPlace  = 0;
-  private final ArrayList<int[]>[] shipsPositions;
+  private int totalShipsToPlace = 0;
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
 
 
   public Game(int width, int height, ArrayList<ShipConfig> shipConfigs) {
     this.width = width;
     this.height = height;
-    this.player1Battlefield = new Battlefield(width, height);
-    this.player2Battlefield = new Battlefield(width, height);
     this.isPlayerOneTurn = true;
     this.scanner = new Scanner(System.in);
 
@@ -30,15 +27,13 @@ public class Game {
       shipsToPlace.put(sc.length, shipsToPlace.getOrDefault(sc.length, 0) + sc.amount);
     });
 
-    this.shipsPositions = new ArrayList[shipsToPlace.size()];
-    for (int i = 0; i < shipsPositions.length; i++) {
-      shipsPositions[i] = new ArrayList<>();
-    }
+    this.player1Battlefield = new Battlefield(width, height, totalShipsToPlace);
+    this.player2Battlefield = new Battlefield(width, height, totalShipsToPlace);
   }
 
   public void restartGame() {
-    this.player1Battlefield = new Battlefield(width, height);
-    this.player2Battlefield = new Battlefield(width, height);
+    this.player1Battlefield = new Battlefield(width, height, totalShipsToPlace);
+    this.player2Battlefield = new Battlefield(width, height, totalShipsToPlace);
     this.isPlayerOneTurn = true;
   }
 
