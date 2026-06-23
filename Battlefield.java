@@ -59,18 +59,33 @@ public class Battlefield {
     public String hitField(int x, int y) {
         try{
             String shotField = coordinateSystem[x][y];
-                
-            if(shotField.equals("free")) {
-                coordinateSystem[x][y] = "emptyHit";
-
-                return "emptyHit";
-            } else if(parseShipId(shotField) >= 0) {
+            
+            int shipId = parseShipId(shotField);
+            if(shipId >= 0) {
                 String newFieldValue = "shipHit_" + shotField;
                 
                 coordinateSystem[x][y] = newFieldValue;
                 shipHitFields++;
 
+                // DIRTY: Find the hit ship and if its sunken
+                ArrayList<int[]> shipPositions = calculatedShipsPositions[shipId];
+
+                boolean isShipSunken = true; 
+
+                for(int[] coordinates : shipPositions) {
+                    String fieldValue = coordinateSystem[coordinates[0]][coordinates[1]];
+
+                    if (parseShipId(fieldValue) >= 0) {
+                        isShipSunken = false;
+                        break;
+                    }
+                }
+
                 return newFieldValue;
+            } else if(shotField.equals("free")) {
+                coordinateSystem[x][y] = "emptyHit";
+
+                return "emptyHit";
             }
         }
         catch(IndexOutOfBoundsException err){
