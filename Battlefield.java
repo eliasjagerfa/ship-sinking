@@ -14,7 +14,7 @@ public class Battlefield {
         this.height = height;
         this.coordinateSystem = new String[height][width];
         for(String[] row : coordinateSystem){
-            Arrays.fill(row, "isFree");
+            Arrays.fill(row, "free");
         }
 
         this.calculatedShipsPositions = new ArrayList[shipsToPlace];
@@ -60,12 +60,12 @@ public class Battlefield {
         try{
             String shotField = coordinateSystem[x][y];
                 
-            if(shotField.equals("isFree")) {
+            if(shotField.equals("free")) {
                 coordinateSystem[x][y] = "emptyHit";
 
                 return "emptyHit";
             } else if(parseShipId(shotField) >= 0) {
-                String newFieldValue = "isShipHit_" + shotField;
+                String newFieldValue = "shipHit_" + shotField;
                 
                 coordinateSystem[x][y] = newFieldValue;
                 shipHitFields++;
