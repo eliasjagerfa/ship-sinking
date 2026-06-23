@@ -107,6 +107,7 @@ public class Game {
                 shipsPlaced++;
                 player2Battlefield.setShip(newShip, shipsPlaced);
               } else {
+                //TODO: add differenciation between outOfBounds and overLapping
                 out.println("Ship goes outside the battlefield. Try again!");
               }
             }
@@ -125,9 +126,14 @@ public class Game {
 
   public void startGame() {
     while(true){
+    //TODO: Later make this an attribute to define the players display name 
+    String currentPlayer = isPlayerOneTurn ? "1" : "2";
+    // reminder to hand over the device
+    out.println("Please hand the device to Player " + currentPlayer);
+    out.println("Press enter to continue");
+    scanner.nextLine();
       boolean isOver = doTurn();
       if (isOver) { break; }
-      //TODO: Breakcondition is missing me boy
     }
 
     String winner = isPlayerOneTurn ? "1" : "2";
@@ -136,14 +142,6 @@ public class Game {
   }
 
   public boolean doTurn() {
-    //TODO: Later make this an attribute to define the players display name 
-    String currentPlayer = isPlayerOneTurn ? "1" : "2";
-      
-    // reminder to hand over the device
-    out.println("Please hand the device to Player " + currentPlayer);
-    out.println("Press enter to continue");
-    scanner.nextLine();
-
     while (true) {
       out.println("Type the coordinates that you want to hit: (if you dont know in what format, type 'help') ");
       String input = scanner.nextLine().trim().toLowerCase();
@@ -158,7 +156,7 @@ public class Game {
       Pattern pattern = Pattern.compile("^(\\d+) (\\d+)$");
       Matcher matcher = pattern.matcher(input);
       if(matcher.matches()){
-        out.println("You shot at " + input + "*drumroll please*");
+        out.println("You shot at " + input + "  *drumroll please*");
         int x = Integer.parseInt(matcher.group(1));
         int y = Integer.parseInt(matcher.group(2));
         String result = isPlayerOneTurn ? player1Battlefield.hitField(x, y) : player2Battlefield.hitField(x, y);
@@ -174,7 +172,6 @@ public class Game {
           } else {
             if (player2Battlefield.allAreSunken()) { return true; }
           }
-          return false;
         }
       } else {
         out.println("Invalid Command. Try again!");
