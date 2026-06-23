@@ -45,18 +45,21 @@ public class Battlefield {
         return true;
     }
 
-    public boolean hitField(int x, int y) {
+    public String hitField(int x, int y) {
         try{
             String shotField = coordinateSystem[x][y];
             if(shotField.equals("isFree") || parseShipId(shotField) >= 0) {
-                coordinateSystem[x][y] = shotField.equals("isFree") ? "isEmptyHit" : ("isShipHit_" + shotField);
+                coordinateSystem[x][y] = shotField.equals("isFree") ? "emptyHit" : ("isShipHit_" + shotField);
                 ShipHitFields += shotField.equals("isFree") ? 0 : 1;
-                return true;
+                String hitType = coordinateSystem[x][y];
+                return hitType;
             }
         }
-        catch(IndexOutOfBoundsException err){}
-
-        return false;
+        catch(IndexOutOfBoundsException err){
+            System.out.println("Invalid Coordinates. Try again!");
+            return "outOfBounds";
+        }
+        return "alreadyShotAt";
     }   
     
     public boolean allAreSunken() {

@@ -94,17 +94,22 @@ public class Game {
             String rotation = matcher.group(4);
             Ship newShip = new Ship(x, y, length, rotation.equals("h"));
 
-            if( i == 0 ? player1Battlefield.areShipPositionsValid(newShip) : player2Battlefield.areShipPositionsValid(newShip)) {
-              if(i == 0) {
+            if (i == 0) {
+              if (player1Battlefield.areShipPositionsValid(newShip)) {
                 player1Battlefield.setShip(newShip, shipsPlaced);
+                shipsPlaced++;
+                shipsLeftToPlace.merge(length, -1, Integer::sum);
               } else {
-                player2Battlefield.setShip(newShip, shipsPlaced);
+                out.println("Ship goes outside the battlefield. Try again!");
               }
-              shipsPlaced++;
-              shipsLeftToPlace.merge(length, -1, Integer::sum);
             } else {
-              // TODO: add better error handling
-              out.println("Ship goes outside the battlefield. Try again!");
+              if (player2Battlefield.areShipPositionsValid(newShip)) {
+                player2Battlefield.setShip(newShip, shipsPlaced);
+                shipsPlaced++;
+                player2Battlefield.setShip(newShip, shipsPlaced);
+              } else {
+                out.println("Ship goes outside the battlefield. Try again!");
+              }
             }
           } else {
             out.println("No ships of this size can be placed\n");
@@ -120,8 +125,9 @@ public class Game {
   }
 
   public void startGame() {
-    while(isPlayerOneTurn ? !player1Battlefield.allAreSunken() : !player2Battlefield.allAreSunken()){
-      startTurn();
+    while(true){
+      doTurn();
+      //TODO: Breakcondition setzen
     }
 
     String winner = isPlayerOneTurn ? "2" : "1";
@@ -129,17 +135,43 @@ public class Game {
     restartGame();
   }
 
-  public boolean startTurn() {
-    // TODO: Later make this an attribute to define the players display name
+  public void doTurn() {
+    //TODO: Later make this an attribute to define the players display name 
     String currentPlayer = isPlayerOneTurn ? "1" : "2";
-
+      
     // reminder to hand over the device
     out.println("Please hand the device to Player " + currentPlayer);
     out.println("Press enter to continue");
     scanner.nextLine();
 
-    //TODO: Only have this happen if the turn was actually valid and the player didnt hit any ship
-    isPlayerOneTurn = !isPlayerOneTurn;
-    return false;
+    while (true) {
+      out.println("Type the coordinates that you want to hit: (if you dont know in what format, type 'help') ");
+      String input = scanner.nextLine().trim().toLowerCase();
+
+      if(input.equals("help")){
+        out.println("The format is as follows 'x y'");
+        out.println("Example: You want to shoot at the field with x:1 y:1, then you just type '1 1'");
+        out.println("Type the coordinates that you want to hit: ");
+        input = scanner.nextLine();
+      }
+      
+      Pattern pattern = Pattern.compile("^(\\d+) (\\d+)$");
+      Matcher matcher = pattern.matcher(input);
+      if(matcher.matches()){
+        out.println("You shot at " + input + "*drumroll please*");
+        int x = Integer.parseInt(input.split("")[0]);
+        int y = Integer.parseInt(input.split("")[1]);
+        String hitType = isPlayerOneTurn ? player1Battlefield.hitField(x, y) : player2Battlefield.hitField(x, y);
+
+        //TODO: Continue logic pls
+        if(hitType.equals("emptyHit")) {
+          out.println("but no ship got hit");
+          isPlayerOneTurn = !isPlayerOneTurn;
+          break;
+        }
+      } else {
+        out.println("Invalid Command. Try again!");
+      }      
+    }
   }
 }
