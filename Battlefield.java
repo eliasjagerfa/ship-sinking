@@ -6,7 +6,7 @@ public class Battlefield {
     final int width;
     final int height;
     private final String[][] coordinateSystem;
-    private int shipHitFields;
+    private int shipHitFields = 0;
     private int occupiedFields;
     private final ArrayList<int[]>[] calculatedShipsPositions;
 
@@ -68,7 +68,7 @@ public class Battlefield {
                 String newFieldValue = "shipHit_" + shotField;
                 
                 coordinateSystem[x][y] = newFieldValue;
-                shipHitFields++;
+                this.shipHitFields++;
 
                 // DIRTY: Find the hit ship and if its sunken
                 ArrayList<int[]> shipPositions = calculatedShipsPositions[shipId];

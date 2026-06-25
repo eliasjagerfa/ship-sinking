@@ -178,9 +178,9 @@ public class Game {
         } else if (result.contains("shipHit")) {
           out.println("and hit a ship!");
           if(isPlayerOneTurn) {
-            if (player1Battlefield.allAreSunken()) { return true; }
-          } else {
             if (player2Battlefield.allAreSunken()) { return true; }
+          } else {
+            if (player1Battlefield.allAreSunken()) { return true; }
           }
         }
       } else {
