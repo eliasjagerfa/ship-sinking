@@ -105,7 +105,7 @@ public class Game {
               if (player2Battlefield.areShipPositionsValid(newShip)) {
                 player2Battlefield.setShip(newShip, shipsPlaced);
                 shipsPlaced++;
-                player2Battlefield.setShip(newShip, shipsPlaced);
+                shipsLeftToPlace.merge(length, -1, Integer::sum);
               } else {
                 //TODO: add differenciation between outOfBounds and overLapping
                 out.println("Ship goes outside the battlefield. Try again!");
@@ -160,7 +160,18 @@ public class Game {
         out.println("You shot at " + input + "  *drumroll please*");
         int x = Integer.parseInt(matcher.group(1));
         int y = Integer.parseInt(matcher.group(2));
-        String result = isPlayerOneTurn ? player2Battlefield.hitField(x, y) : player1Battlefield.hitField(x, y);
+
+        String result;
+
+        if (isPlayerOneTurn) {
+          result = player2Battlefield.hitField(x, y);
+          String convertedBattlefield = player2Battlefield.convertBattlefieldToText();
+          System.out.print(convertedBattlefield);
+        } else {
+          result = player1Battlefield.hitField(x, y);
+          String convertedBattlefield = player1Battlefield.convertBattlefieldToText();
+          System.out.print(convertedBattlefield);
+        }
 
         if(result.equals("emptyHit")) {
           out.println("but no ship got hit");
