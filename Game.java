@@ -12,13 +12,16 @@ public class Game {
   private Battlefield player2Battlefield;
   private boolean isPlayerOneTurn;
   private final Scanner scanner;
-  private int totalShipsToPlace = 0;
+  private int totalShipsToPlace  = 0;
+  private final ArrayList<int[]>[] shipsPositions;
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
 
 
   public Game(int width, int height, ArrayList<ShipConfig> shipConfigs) {
     this.width = width;
     this.height = height;
+    this.player1Battlefield = new Battlefield(width, height);
+    this.player2Battlefield = new Battlefield(width, height);
     this.isPlayerOneTurn = true;
     this.scanner = new Scanner(System.in);
 
@@ -27,13 +30,15 @@ public class Game {
       shipsToPlace.put(sc.length, shipsToPlace.getOrDefault(sc.length, 0) + sc.amount);
     });
 
-    this.player1Battlefield = new Battlefield(width, height, totalShipsToPlace);
-    this.player2Battlefield = new Battlefield(width, height, totalShipsToPlace);
+    this.shipsPositions = new ArrayList[shipsToPlace.size()];
+    for (int i = 0; i < shipsPositions.length; i++) {
+      shipsPositions[i] = new ArrayList<>();
+    }
   }
 
   public void restartGame() {
-    this.player1Battlefield = new Battlefield(width, height, totalShipsToPlace);
-    this.player2Battlefield = new Battlefield(width, height, totalShipsToPlace);
+    this.player1Battlefield = new Battlefield(width, height);
+    this.player2Battlefield = new Battlefield(width, height);
     this.isPlayerOneTurn = true;
   }
 
@@ -121,12 +126,13 @@ public class Game {
 
   public void startGame() {
     while(true){
-    //TODO: Later make this an attribute to define the players display name 
-    String currentPlayer = isPlayerOneTurn ? "1" : "2";
-    // reminder to hand over the device
-    out.println("Please hand the device to Player " + currentPlayer);
-    out.println("Press enter to continue");
-    scanner.nextLine();
+      //TODO: Later make this an attribute to define the players display name 
+      String currentPlayer = isPlayerOneTurn ? "1" : "2";
+      // reminder to hand over the device
+      out.println("Please hand the device to Player " + currentPlayer);
+      out.println("Press enter to continue");
+      scanner.nextLine();
+      
       boolean isOver = doTurn();
       if (isOver) { break; }
     }
