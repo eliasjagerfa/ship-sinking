@@ -32,11 +32,11 @@ public class Battlefield {
             if(ship.isHorizontal) {
                 coordinateSystem[position][ship.y] = String.format("%d", shipId);
                 occupiedFields++;
-                csps.add(new int[] {ship.x, position});
+                csps.add(new int[] {position, ship.y});
             } else {
                 coordinateSystem[ship.x][position] = String.format("%d", shipId);
                 occupiedFields++;
-                csps.add(new int[] {position, ship.y});
+                csps.add(new int[] {ship.x, position});
             }
         }
         calculatedShipsPositions[shipId] = csps;
@@ -59,44 +59,42 @@ public class Battlefield {
         return true;
     }
 
-    public String hitField(int x, int y) {
-        try{
-            String shotField = coordinateSystem[x][y];
+    public GameTypes.HitShipResult hitField(int x, int y) {
+        String shotField;
+        try {
+            shotField = coordinateSystem[x][y];
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Out of bounds: " + x + ", " + y);
+        }
+        
+        int shipId = parseShipId(shotField);
+        if(shipId >= 0) {
+            String newFieldValue = "shipHit_" + shotField;
             
-            int shipId = parseShipId(shotField);
-            if(shipId >= 0) {
-                String newFieldValue = "shipHit_" + shotField;
-                
-                coordinateSystem[x][y] = newFieldValue;
-                this.shipHitFields++;
+            coordinateSystem[x][y] = newFieldValue;
+            this.shipHitFields++;
 
-                // DIRTY: Find the hit ship and if its sunken
-                ArrayList<int[]> shipPositions = calculatedShipsPositions[shipId];
+            ArrayList<int[]> shipPositions = calculatedShipsPositions[shipId];
 
-                boolean isShipSunken = true; 
+            boolean isShipSunken = true; 
 
-                for(int[] coordinates : shipPositions) {
-                    String fieldValue = coordinateSystem[coordinates[0]][coordinates[1]];
+            for(int[] coordinates : shipPositions) {
+                String fieldValue = coordinateSystem[coordinates[0]][coordinates[1]];
 
-                    if (parseShipId(fieldValue) >= 0) {
-                        isShipSunken = false;
-                        break;
-                    }
+                if (parseShipId(fieldValue) >= 0) {
+                    isShipSunken = false;
+                    break;
                 }
-
-                return newFieldValue;
-            } else if(shotField.equals("free")) {
-                coordinateSystem[x][y] = "emptyHit";
-
-                return "emptyHit";
             }
+
+            return new GameTypes.HitShipResult(shotField, newFieldValue, true, isShipSunken);
+        } else if(shotField.equals("free")) {
+            coordinateSystem[x][y] = "emptyHit";
+
+            return new GameTypes.HitShipResult("free", "emptyHit", false, false);
         }
-        catch(IndexOutOfBoundsException err){
-            System.out.println("Invalid Coordinates. Try again!");
-            return "outOfBounds";
-        }
-        System.out.println("You already shot at these coordinates");
-        return "alreadyShotAt";
+
+        return new GameTypes.HitShipResult(shotField, shotField, false, false);
     }   
     
     public boolean allAreSunken() {
