@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Function;
 
 public class Battlefield {
     final int width;
@@ -8,6 +9,8 @@ public class Battlefield {
     private int shipHitFields;
     private int occupiedFields;
     private final ArrayList<int[]>[] calculatedShipsPositions;
+
+    private final static String[] textBlocks = {"+", "---", "|"};
 
     public Battlefield(int width, int height, int shipsToPlace) {
         this.width = width;
@@ -106,5 +109,49 @@ public class Battlefield {
         } catch (NumberFormatException err) {
             return -1;
         }
+    }
+
+    public String convertBattlefieldToText() {
+        Function<String, String> mapFieldToText = (field) -> {
+            if ("emptyHit".equals(field)) return "x";
+                
+            if (field.startsWith("shipHit_")) {
+                return field.replaceAll("[^0-9]", "");
+            }
+
+            return " ";
+        };
+    
+        String[] mappedBattlefieldRows = new String[height];
+
+        for (int i = 0; i < height; i++) {
+            int rowIndex = height - i - 1;
+
+            StringBuilder rowSb = new StringBuilder();
+
+            rowSb.append(textBlocks[2]);
+
+            for (int colIndex = 0; colIndex < width; colIndex++) {
+                String convertedField = mapFieldToText.apply(coordinateSystem[colIndex][rowIndex]);
+                rowSb.append(String.format(" %s %s", convertedField, textBlocks[2]));
+            }
+
+            mappedBattlefieldRows[i] = rowSb.toString();
+        }
+
+        String lineSeparator =
+            textBlocks[0] +
+            (textBlocks[1] + textBlocks[0]).repeat(width);
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(lineSeparator).append("\n");
+
+        for (String mappedRow: mappedBattlefieldRows) {
+            sb.append(mappedRow).append("\n");
+            sb.append(lineSeparator).append("\n");
+        }
+
+        return sb.toString();
     }
 }
