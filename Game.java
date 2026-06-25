@@ -168,17 +168,23 @@ public class Game {
       Pattern pattern = Pattern.compile("^(\\d+) (\\d+)$");
       Matcher matcher = pattern.matcher(input);
       if(matcher.matches()){
-        out.println("\nYou shot at " + input + "  *drumroll please*\n");
         int x = Integer.parseInt(matcher.group(1));
         int y = Integer.parseInt(matcher.group(2));
 
         GameTypes.HitShipResult result;
 
-        if (isPlayerOneTurn) {
-          result = player2Battlefield.hitField(x, y);
-        } else {
-          result = player1Battlefield.hitField(x, y);
+        try {
+          if (isPlayerOneTurn) {
+            result = player2Battlefield.hitField(x, y);
+          } else {
+            result = player1Battlefield.hitField(x, y);
+          }
+        } catch (Exception e) {
+          out.printf("\n%s\nTry again!\n\n", e.getMessage());
+          continue;
         }
+        
+        out.println("\nYou shot at " + input + "  *drumroll please*\n");
 
         if(result.newFieldValue().equals("emptyHit")) {
 
