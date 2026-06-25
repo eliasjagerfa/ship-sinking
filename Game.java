@@ -122,6 +122,7 @@ public class Game {
       out.println("All ships sucessfully placed");
     }
     
+    clearScreen();
     isPlayerOneTurn = true;
   }
 
@@ -134,32 +135,36 @@ public class Game {
       out.println("Press enter to continue");
       scanner.nextLine();
 
+      clearScreen();
+
       boolean isOver = doTurn();
       if (isOver) { break; }
     }
 
     String winner = isPlayerOneTurn ? "1" : "2";
+    System.out.println("You hit the last ship!\n");
     out.print("Player " + winner + " has won!");
     restartGame();
   }
 
   public boolean doTurn() {
+    System.out.println("(type 'help' if you dont know how to hit ships)\n");
     while (true) {
       printBattlefields();
-      out.println("Type the coordinates that you want to hit: (if you dont know in what format, type 'help') ");
+      out.println("Type the coordinates of the enemies field that you want to hit:");
       String input = scanner.nextLine().trim().toLowerCase();
 
       if(input.equals("help")){
-        out.println("The format is as follows 'x y'");
-        out.println("Example: You want to shoot at the field with x:1 y:1, then you just type '1 1'");
-        out.println("Type the coordinates that you want to hit: ");
-        input = scanner.nextLine().trim();
+        out.println("The format is as follows: 'x y'");
+        out.println("Example: You want to shoot at the field with x:1 y:1, then you just type '1 1'\n");
+        
+        continue;
       }
       
       Pattern pattern = Pattern.compile("^(\\d+) (\\d+)$");
       Matcher matcher = pattern.matcher(input);
       if(matcher.matches()){
-        out.println("You shot at " + input + "  *drumroll please*");
+        out.println("\nYou shot at " + input + "  *drumroll please*\n");
         int x = Integer.parseInt(matcher.group(1));
         int y = Integer.parseInt(matcher.group(2));
 
@@ -172,19 +177,21 @@ public class Game {
         }
 
         if(result.equals("emptyHit")) {
-          out.println("but no ship got hit");
+          out.println("No ship was hit");
           isPlayerOneTurn = !isPlayerOneTurn;
           return false;
         } else if (result.contains("shipHit")) {
-          out.println("and hit a ship!");
           if(isPlayerOneTurn) {
             if (player2Battlefield.allAreSunken()) { return true; }
           } else {
             if (player1Battlefield.allAreSunken()) { return true; }
           }
+
+          out.println("You hit a ship!");
+          out.println("You can shoot once more!\n");
         }
       } else {
-        out.println("Invalid Command. Try again!");
+        out.println("Invalid Command. Try again! (type 'help' if you dont know how to hit ships)\n");
       }      
     }
   }
@@ -192,19 +199,39 @@ public class Game {
   private void printBattlefields() {
     String[] currentPlayersBoard;
     String[] enemieBoard;
+    String currentPlayersBoardHeader;
+    String enemieBoardHeader;
 
     if (isPlayerOneTurn) {
       currentPlayersBoard = player1Battlefield.convertBattlefieldToText().split("\n");
       enemieBoard = player2Battlefield.convertBattlefieldToText().split("\n");
+
+      currentPlayersBoardHeader = "Player 1";
+      enemieBoardHeader = "Player 2";
     } else {
       currentPlayersBoard = player2Battlefield.convertBattlefieldToText().split("\n");
       enemieBoard = player1Battlefield.convertBattlefieldToText().split("\n");
+
+      currentPlayersBoardHeader = "Player 2";
+      enemieBoardHeader = "Player 1";
     }
 
-    System.out.printf("%-" + (width * 4 + 1) + "s    %s", "You", "Enemie\n");
+    currentPlayersBoardHeader += " (you)";
+    enemieBoardHeader += " (enemy)";
+
+    int distance = Math.max(width * 4, currentPlayersBoardHeader.length()) + 4;
+
+    System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoardHeader, enemieBoardHeader);
 
     for(int i = 0; i < currentPlayersBoard.length; i++) {
-      System.out.printf("%s    %s\n", currentPlayersBoard[i], enemieBoard[i]);
+      System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoard[i], enemieBoard[i]);
     }
+  }
+
+  public static void clearScreen() {
+    System.out.print("\n".repeat(10));
+    System.out.print("\033[H\033[2J");
+    System.out.flush();
+    System.out.print("\n".repeat(5));
   }
 }
