@@ -137,8 +137,10 @@ public class Game {
 
       clearScreen();
 
-      boolean isOver = doTurn();
-      if (isOver) { break; }
+      GameTypes.DoTurnResult result = doTurn();
+      if (result.hasWon()) { break; }
+
+      isPlayerOneTurn = !isPlayerOneTurn;
     }
 
     String winner = isPlayerOneTurn ? "1" : "2";
@@ -147,7 +149,9 @@ public class Game {
     restartGame();
   }
 
-  public boolean doTurn() {
+  public GameTypes.DoTurnResult doTurn() {
+    int shipsHitStreak = 0;
+
     System.out.println("(type 'help' if you dont know how to hit ships)\n");
     while (true) {
       printBattlefields();
@@ -177,14 +181,16 @@ public class Game {
         }
 
         if(result.equals("emptyHit")) {
+
           out.println("No ship was hit");
-          isPlayerOneTurn = !isPlayerOneTurn;
-          return false;
+          return new GameTypes.DoTurnResult(isPlayerOneTurn, 0, false);
+
         } else if (result.contains("shipHit")) {
-          if(isPlayerOneTurn) {
-            if (player2Battlefield.allAreSunken()) { return true; }
-          } else {
-            if (player1Battlefield.allAreSunken()) { return true; }
+          shipsHitStreak++;
+
+          if (player2Battlefield.allAreSunken() || player1Battlefield.allAreSunken()) { 
+
+            return new GameTypes.DoTurnResult(isPlayerOneTurn, shipsHitStreak, true);
           }
 
           out.println("You hit a ship!");
