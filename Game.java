@@ -172,7 +172,7 @@ public class Game {
         int x = Integer.parseInt(matcher.group(1));
         int y = Integer.parseInt(matcher.group(2));
 
-        String result;
+        GameTypes.HitShipResult result;
 
         if (isPlayerOneTurn) {
           result = player2Battlefield.hitField(x, y);
@@ -180,12 +180,12 @@ public class Game {
           result = player1Battlefield.hitField(x, y);
         }
 
-        if(result.equals("emptyHit")) {
+        if(result.newFieldValue().equals("emptyHit")) {
 
           out.println("No ship was hit");
           return new GameTypes.DoTurnResult(isPlayerOneTurn, 0, false);
 
-        } else if (result.contains("shipHit")) {
+        } else if (result.isShipHit()) {
           shipsHitStreak++;
 
           if (player2Battlefield.allAreSunken() || player1Battlefield.allAreSunken()) { 
@@ -193,7 +193,10 @@ public class Game {
             return new GameTypes.DoTurnResult(isPlayerOneTurn, shipsHitStreak, true);
           }
 
-          out.println("You hit a ship!");
+          if (result.isShipSunken()) {
+            out.println("You have sunk a ship!");
+          } else out.println("You hit a ship!");
+          
           out.println("You can shoot once more!\n");
         }
       } else {
