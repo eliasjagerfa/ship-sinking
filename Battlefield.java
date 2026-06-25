@@ -15,7 +15,7 @@ public class Battlefield {
     public Battlefield(int width, int height, int shipsToPlace) {
         this.width = width;
         this.height = height;
-        this.coordinateSystem = new String[height][width];
+        this.coordinateSystem = new String[width][height];
         for(String[] row : coordinateSystem){
             Arrays.fill(row, "free");
         }
