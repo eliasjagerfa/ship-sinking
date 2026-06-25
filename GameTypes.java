@@ -4,4 +4,11 @@ public class GameTypes {
     int shipsHitStreak,
     boolean hasWon
   ) {}
+
+  public record HitShipResult(
+    String oldFieldValue,
+    String newFieldValue,
+    boolean isShipHit,
+    boolean isShipSunken
+  ) {}
 }
