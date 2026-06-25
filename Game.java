@@ -145,6 +145,7 @@ public class Game {
 
   public boolean doTurn() {
     while (true) {
+      printBattlefields();
       out.println("Type the coordinates that you want to hit: (if you dont know in what format, type 'help') ");
       String input = scanner.nextLine().trim().toLowerCase();
 
@@ -166,12 +167,8 @@ public class Game {
 
         if (isPlayerOneTurn) {
           result = player2Battlefield.hitField(x, y);
-          String convertedBattlefield = player2Battlefield.convertBattlefieldToText();
-          System.out.print(convertedBattlefield);
         } else {
           result = player1Battlefield.hitField(x, y);
-          String convertedBattlefield = player1Battlefield.convertBattlefieldToText();
-          System.out.print(convertedBattlefield);
         }
 
         if(result.equals("emptyHit")) {
@@ -189,6 +186,25 @@ public class Game {
       } else {
         out.println("Invalid Command. Try again!");
       }      
+    }
+  }
+
+  private void printBattlefields() {
+    String[] currentPlayersBoard;
+    String[] enemieBoard;
+
+    if (isPlayerOneTurn) {
+      currentPlayersBoard = player1Battlefield.convertBattlefieldToText().split("\n");
+      enemieBoard = player2Battlefield.convertBattlefieldToText().split("\n");
+    } else {
+      currentPlayersBoard = player2Battlefield.convertBattlefieldToText().split("\n");
+      enemieBoard = player1Battlefield.convertBattlefieldToText().split("\n");
+    }
+
+    System.out.printf("%-" + (width * 4 + 1) + "s    %s", "You", "Enemie\n");
+
+    for(int i = 0; i < currentPlayersBoard.length; i++) {
+      System.out.printf("%s    %s\n", currentPlayersBoard[i], enemieBoard[i]);
     }
   }
 }
