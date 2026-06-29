@@ -87,7 +87,6 @@ public class Game {
         Pattern pattern = Pattern.compile("^(\\d+) (\\d+) (\\d+) ([hv])$");
         Matcher matcher = pattern.matcher(input);
 
-        //TODO: add validator for battlefield size
         if (matcher.matches()) {
           int length = Integer.parseInt(matcher.group(3));
           int amountShipOfLength = shipsLeftToPlace.getOrDefault(length, 0);
@@ -219,34 +218,33 @@ public class Game {
 
   private void printBattlefields() {
     String[] currentPlayersBoard;
-    String[] enemieBoard;
+    String[] enemyBoard;
     String currentPlayersBoardHeader;
-    String enemieBoardHeader;
+    String enemyBoardHeader;
 
     if (isPlayerOneTurn) {
-      //TODO: fix ur damn spelling mistakes pls (enemy not enemie)
       currentPlayersBoard = player1Battlefield.convertBattlefieldToText().split("\n");
-      enemieBoard = player2Battlefield.convertBattlefieldToText().split("\n");
+      enemyBoard = player2Battlefield.convertBattlefieldToText().split("\n");
 
       currentPlayersBoardHeader = "Player 1";
-      enemieBoardHeader = "Player 2";
+      enemyBoardHeader = "Player 2";
     } else {
       currentPlayersBoard = player2Battlefield.convertBattlefieldToText().split("\n");
-      enemieBoard = player1Battlefield.convertBattlefieldToText().split("\n");
+      enemyBoard = player1Battlefield.convertBattlefieldToText().split("\n");
 
       currentPlayersBoardHeader = "Player 2";
-      enemieBoardHeader = "Player 1";
+      enemyBoardHeader = "Player 1";
     }
 
     currentPlayersBoardHeader += " (you)";
-    enemieBoardHeader += " (enemy)";
+    enemyBoardHeader += " (enemy)";
 
     int distance = Math.max(width * 4, currentPlayersBoardHeader.length()) + 4;
 
-    System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoardHeader, enemieBoardHeader);
+    System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoardHeader, enemyBoardHeader);
 
     for(int i = 0; i < currentPlayersBoard.length; i++) {
-      System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoard[i], enemieBoard[i]);
+      System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoard[i], enemyBoard[i]);
     }
   }
 
