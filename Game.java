@@ -1,3 +1,4 @@
+import java.io.IOException;
 import static java.lang.System.out;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,21 +12,25 @@ public class Game {
   private Battlefield player1Battlefield;
   private Battlefield player2Battlefield;
   private boolean isPlayerOneTurn;
+  final String playerOne;
+  final String playerTwo;
   private final Scanner scanner;
   private int totalShipsToPlace  = 0;
   private final ArrayList<int[]>[] shipsPositions;
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
 
 
-  public Game(int width, int height, ArrayList<ShipConfig> shipConfigs) {
-    this.width = width;
-    this.height = height;
+  public Game(GameTemplate template, String playerOneName, String playerTwoName) {
+    this.width = template.getWidth();
+    this.height = template.getHeight();
     this.isPlayerOneTurn = true;
+    this.playerOne = playerOneName;
+    this.playerTwo = playerTwoName;
     this.scanner = new Scanner(System.in);
 
-    shipConfigs.forEach((sc) -> {
+    template.getConfig().forEach((sc) -> {
       totalShipsToPlace += sc.amount;
-      shipsToPlace.put(sc.length, shipsToPlace.getOrDefault(sc.length, 0) + sc.amount);
+      shipsToPlace.put(sc.length, sc.amount);
     });
 
     this.player1Battlefield = new Battlefield(width, height, totalShipsToPlace);
@@ -48,31 +53,33 @@ public class Game {
   }
 
   public void startShipPlacement() {
+    out.println("Template locked in");
     for (int i = 0; i < 2; i++) {
-      String currentPlayer = i == 0 ? "1" : "2";
-      out.println("Please hand the device to Player " + currentPlayer);
+      String currentPlayer = i == 0 ? playerOne : playerTwo;
+      out.println("\nPlease hand the device to Player " + currentPlayer);
       out.println("Press enter to continue");
       scanner.nextLine();
+      clearScreen();
       
       HashMap<Integer, Integer> shipsLeftToPlace = new HashMap<>(shipsToPlace);
       int shipsPlaced = 0;
       int shipsPlacedBefore = 0;
 
-      out.println("You can now place ships on your battlefield. (if you dont know how to place ships, type 'help')");
+      out.println("You can now place ships on your battlefield.\n");
 
       while (totalShipsToPlace != shipsPlaced) {
         if(shipsPlacedBefore != shipsPlaced) {
-          out.println("Ship placed successfully");
-          out.println("You have " + (totalShipsToPlace - shipsPlaced) + " left to place\n");
+          out.println("You have " + (totalShipsToPlace - shipsPlaced) + " ship(s) left to place in total");
           shipsPlacedBefore = shipsPlaced;
         }
+        out.println("\nIf you dont know how to place ships, type 'help'");
+        out.println("if you want to know each ship you have to place, type 'status'");
         out.print("Enter your ships position: ");
 
-        String input = scanner.nextLine().toLowerCase().trim();
 
-        // TODO: add a command to show which ships are left to place and how many of each size, which can be done by printing the shipsLeftToPlace hashmap in a nice format, which would be helpful for the user to keep track of which ships they have already placed and which ones they still have to place
-        // Additionally after a ship has been placed successfully, it would be nice to say which ship has been placed and how many of that length are left
-        // But you could also make it print automatically after every successful ship placement, although this might be a bit too much information for the user, so maybe only print it when the user types a command like "status" or something like that
+        String input = scanner.nextLine().toLowerCase().trim();
+        out.println();
+
         if (input.equals("help")) {
           out.println("To place a ship, type in the following format: 'x y length orientation'");
           out.println("x and y are the coordinates of the starting point of the ship, length is the length of the ship and orientation is either 'h' for horizontal or 'v' for vertical");
@@ -81,10 +88,16 @@ public class Game {
           continue;
         }
 
+        if (input.equals("status")) {
+          shipsLeftToPlace.forEach((length, amount) -> {
+            out.println("You have " + amount + "ship(s) of length " + length + " left to place");
+          });
+          continue;
+        }
+
         Pattern pattern = Pattern.compile("^(\\d+) (\\d+) (\\d+) ([hv])$");
         Matcher matcher = pattern.matcher(input);
 
-        //TODO: add validator for battlefield size
         if (matcher.matches()) {
           int length = Integer.parseInt(matcher.group(3));
           int amountShipOfLength = shipsLeftToPlace.getOrDefault(length, 0);
@@ -99,6 +112,8 @@ public class Game {
                 player1Battlefield.setShip(newShip, shipsPlaced);
                 shipsPlaced++;
                 shipsLeftToPlace.merge(length, -1, Integer::sum);
+                out.println("Ship placed successfully");
+                out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
               } else {
                 out.println("Ship goes outside the battlefield. Try again!");
               }
@@ -107,9 +122,8 @@ public class Game {
                 player2Battlefield.setShip(newShip, shipsPlaced);
                 shipsPlaced++;
                 shipsLeftToPlace.merge(length, -1, Integer::sum);
-              } else {
-                //TODO: add differenciation between outOfBounds and overLapping
-                out.println("Ship goes outside the battlefield. Try again!");
+                out.println("Ship placed successfully");
+                out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
               }
             }
           } else {
@@ -119,19 +133,17 @@ public class Game {
           out.println("Wrong command, try again\n");
         }
       }
+      clearScreen();
       out.println("All ships sucessfully placed");
     }
-    
-    clearScreen();
     isPlayerOneTurn = true;
   }
 
   public void startGame() {
     while(true){
-      //TODO: Later make this an attribute to define the players display name 
-      String currentPlayer = isPlayerOneTurn ? "1" : "2";
+      String currentPlayer = isPlayerOneTurn ? playerOne : playerTwo;
       // reminder to hand over the device
-      out.println("Please hand the device to Player " + currentPlayer);
+      out.println("Please hand the device to  " + currentPlayer);
       out.println("Press enter to continue");
       scanner.nextLine();
 
@@ -144,7 +156,7 @@ public class Game {
     }
 
     String winner = isPlayerOneTurn ? "1" : "2";
-    System.out.println("You hit the last ship!\n");
+    System.out.println("You sunk the last ship!\n");
     out.print("Player " + winner + " has won!");
     restartGame();
   }
@@ -154,11 +166,12 @@ public class Game {
 
     System.out.println("(type 'help' if you dont know how to hit ships)\n");
     while (true) {
-      printBattlefields();
+      printBattlefields(playerOne, playerTwo);
       out.println("Type the coordinates of the enemies field that you want to hit:");
       String input = scanner.nextLine().trim().toLowerCase();
 
       if(input.equals("help")){
+        clearScreen();
         out.println("The format is as follows: 'x y'");
         out.println("Example: You want to shoot at the field with x:1 y:1, then you just type '1 1'\n");
         
@@ -180,6 +193,7 @@ public class Game {
             result = player1Battlefield.hitField(x, y);
           }
         } catch (Exception e) {
+          clearScreen();
           out.printf("\n%s\nTry again!\n\n", e.getMessage());
           continue;
         }
@@ -187,7 +201,7 @@ public class Game {
         out.println("\nYou shot at " + input + "  *drumroll please*\n");
 
         if(result.newFieldValue().equals("emptyHit")) {
-
+          clearScreen();
           out.println("No ship was hit");
           return new GameTypes.DoTurnResult(isPlayerOneTurn, 0, false);
 
@@ -200,8 +214,13 @@ public class Game {
           }
 
           if (result.isShipSunken()) {
+            clearScreen();
             out.println("You have sunk a ship!");
-          } else out.println("You hit a ship!");
+          } else {
+            clearScreen();
+            out.println("You hit a ship!");
+          }
+
           
           out.println("You can shoot once more!\n");
         }
@@ -211,42 +230,52 @@ public class Game {
     }
   }
 
-  private void printBattlefields() {
+  private void printBattlefields(String playerOneName, String playerTwoName) {
     String[] currentPlayersBoard;
-    String[] enemieBoard;
+    String[] enemyBoard;
     String currentPlayersBoardHeader;
-    String enemieBoardHeader;
+    String enemyBoardHeader;
 
     if (isPlayerOneTurn) {
       currentPlayersBoard = player1Battlefield.convertBattlefieldToText().split("\n");
-      enemieBoard = player2Battlefield.convertBattlefieldToText().split("\n");
+      enemyBoard = player2Battlefield.convertBattlefieldToText().split("\n");
 
-      currentPlayersBoardHeader = "Player 1";
-      enemieBoardHeader = "Player 2";
+      currentPlayersBoardHeader = playerOneName;
+      enemyBoardHeader = playerTwoName;
     } else {
       currentPlayersBoard = player2Battlefield.convertBattlefieldToText().split("\n");
-      enemieBoard = player1Battlefield.convertBattlefieldToText().split("\n");
+      enemyBoard = player1Battlefield.convertBattlefieldToText().split("\n");
 
-      currentPlayersBoardHeader = "Player 2";
-      enemieBoardHeader = "Player 1";
+      currentPlayersBoardHeader = playerTwoName;
+      enemyBoardHeader = playerOneName;
     }
 
     currentPlayersBoardHeader += " (you)";
-    enemieBoardHeader += " (enemy)";
+    enemyBoardHeader += " (enemy)";
 
     int distance = Math.max(width * 4, currentPlayersBoardHeader.length()) + 4;
 
-    System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoardHeader, enemieBoardHeader);
+    System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoardHeader, enemyBoardHeader);
 
     for(int i = 0; i < currentPlayersBoard.length; i++) {
-      System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoard[i], enemieBoard[i]);
+      System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoard[i], enemyBoard[i]);
     }
   }
 
   public static void clearScreen() {
-    System.out.print("\n".repeat(10));
-    System.out.print("\033[H\033[2J");
-    System.out.flush();
-    System.out.print("\n".repeat(5));
+    try { 
+    String os = System.getProperty("os.name").toLowerCase();
+    ProcessBuilder pb;
+    if (os.contains("win")) {
+        pb = new ProcessBuilder("cmd", "/c", "cls");
+    } else {
+        pb = new ProcessBuilder("clear");
+    }
+    pb.inheritIO().start().waitFor();
+
+    } catch (IOException | InterruptedException e) {
+      out.print("\u001B[2J\u001B[3J");
+    }
+    
   }
 }
