@@ -110,9 +110,6 @@ public class Game {
                 player2Battlefield.setShip(newShip, shipsPlaced);
                 shipsPlaced++;
                 shipsLeftToPlace.merge(length, -1, Integer::sum);
-              } else {
-                //TODO: add differenciation between outOfBounds and overLapping
-                out.println("Ship goes outside the battlefield. Try again!");
               }
             }
           } else {

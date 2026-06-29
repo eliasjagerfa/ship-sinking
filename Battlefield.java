@@ -52,8 +52,11 @@ public class Battlefield {
                 ? parseShipId(coordinateSystem[position][ship.y]) >= 0
                 : parseShipId(coordinateSystem[ship.x][position]) >= 0;
 
-            if(!isInBounds || isOverlapping) {
+            if(!isInBounds) {
+                System.out.println("Ship goes outside the battleship. Try again!");
                 return false;
+            } else if(isOverlapping) {
+                System.out.println("Ship overlaps with another. Try again!");
             }
         }
         return true;
