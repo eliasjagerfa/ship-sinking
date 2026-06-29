@@ -17,15 +17,15 @@ public class Game {
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
 
 
-  public Game(int width, int height, ArrayList<ShipConfig> shipConfigs) {
-    this.width = width;
-    this.height = height;
+  public Game(GameTemplate template) {
+    this.width = template.getWidth();
+    this.height = template.getHeight();
     this.isPlayerOneTurn = true;
     this.scanner = new Scanner(System.in);
 
-    shipConfigs.forEach((sc) -> {
+    template.getConfig().forEach((sc) -> {
       totalShipsToPlace += sc.amount;
-      shipsToPlace.put(sc.length, shipsToPlace.getOrDefault(sc.length, 0) + sc.amount);
+      shipsToPlace.put(sc.length, sc.amount);
     });
 
     this.player1Battlefield = new Battlefield(width, height, totalShipsToPlace);
@@ -48,11 +48,13 @@ public class Game {
   }
 
   public void startShipPlacement() {
+    out.println("Template locked in");
     for (int i = 0; i < 2; i++) {
       String currentPlayer = i == 0 ? "1" : "2";
-      out.println("Please hand the device to Player " + currentPlayer);
+      out.println("\nPlease hand the device to Player " + currentPlayer);
       out.println("Press enter to continue");
       scanner.nextLine();
+      clearScreen();
       
       HashMap<Integer, Integer> shipsLeftToPlace = new HashMap<>(shipsToPlace);
       int shipsPlaced = 0;
@@ -69,6 +71,7 @@ public class Game {
         out.print("Enter your ships position: ");
 
         String input = scanner.nextLine().toLowerCase().trim();
+        out.println();
 
         // TODO: add a command to show which ships are left to place and how many of each size, which can be done by printing the shipsLeftToPlace hashmap in a nice format, which would be helpful for the user to keep track of which ships they have already placed and which ones they still have to place
         // Additionally after a ship has been placed successfully, it would be nice to say which ship has been placed and how many of that length are left
@@ -119,10 +122,9 @@ public class Game {
           out.println("Wrong command, try again\n");
         }
       }
+      clearScreen();
       out.println("All ships sucessfully placed");
     }
-    
-    clearScreen();
     isPlayerOneTurn = true;
   }
 
@@ -144,7 +146,7 @@ public class Game {
     }
 
     String winner = isPlayerOneTurn ? "1" : "2";
-    System.out.println("You hit the last ship!\n");
+    System.out.println("You sunk the last ship!\n");
     out.print("Player " + winner + " has won!");
     restartGame();
   }
@@ -159,6 +161,7 @@ public class Game {
       String input = scanner.nextLine().trim().toLowerCase();
 
       if(input.equals("help")){
+        clearScreen();
         out.println("The format is as follows: 'x y'");
         out.println("Example: You want to shoot at the field with x:1 y:1, then you just type '1 1'\n");
         
@@ -180,6 +183,7 @@ public class Game {
             result = player1Battlefield.hitField(x, y);
           }
         } catch (Exception e) {
+          clearScreen();
           out.printf("\n%s\nTry again!\n\n", e.getMessage());
           continue;
         }
@@ -187,7 +191,7 @@ public class Game {
         out.println("\nYou shot at " + input + "  *drumroll please*\n");
 
         if(result.newFieldValue().equals("emptyHit")) {
-
+          clearScreen();
           out.println("No ship was hit");
           return new GameTypes.DoTurnResult(isPlayerOneTurn, 0, false);
 
@@ -200,8 +204,13 @@ public class Game {
           }
 
           if (result.isShipSunken()) {
+            clearScreen();
             out.println("You have sunk a ship!");
-          } else out.println("You hit a ship!");
+          } else {
+            clearScreen();
+            out.println("You hit a ship!");
+          }
+
           
           out.println("You can shoot once more!\n");
         }
@@ -218,6 +227,7 @@ public class Game {
     String enemieBoardHeader;
 
     if (isPlayerOneTurn) {
+      //TODO: fix ur damn spelling mistakes pls (enemy not enemie)
       currentPlayersBoard = player1Battlefield.convertBattlefieldToText().split("\n");
       enemieBoard = player2Battlefield.convertBattlefieldToText().split("\n");
 
@@ -244,9 +254,6 @@ public class Game {
   }
 
   public static void clearScreen() {
-    System.out.print("\n".repeat(10));
-    System.out.print("\033[H\033[2J");
-    System.out.flush();
-    System.out.print("\n".repeat(5));
+    System.out.print("\u001B[2J\u001B[3J");
   }
 }
