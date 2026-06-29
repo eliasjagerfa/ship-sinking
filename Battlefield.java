@@ -109,10 +109,14 @@ public class Battlefield {
         }
     }
 
-    public String convertBattlefieldToText() {
+    public String convertBattlefieldToText(boolean showHiddenShips) {
         Function<String, String> mapFieldToText = (field) -> {
             if ("emptyHit".equals(field)) return "x";
-                
+            
+            if (showHiddenShips && parseShipId(field) >= 0) {
+                return field;
+            }
+
             if (field.startsWith("shipHit_")) {
                 return field.replaceAll("[^0-9]", "");
             }
@@ -151,5 +155,9 @@ public class Battlefield {
         }
 
         return sb.toString();
+    }
+
+    public String convertBattlefieldToText() {
+        return convertBattlefieldToText(false);
     }
 }
