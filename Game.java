@@ -1,3 +1,4 @@
+import java.io.IOException;
 import static java.lang.System.out;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,16 +12,20 @@ public class Game {
   private Battlefield player1Battlefield;
   private Battlefield player2Battlefield;
   private boolean isPlayerOneTurn;
+  final String playerOne;
+  final String playerTwo;
   private final Scanner scanner;
   private int totalShipsToPlace  = 0;
   private final ArrayList<int[]>[] shipsPositions;
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
 
 
-  public Game(GameTemplate template) {
+  public Game(GameTemplate template, String playerOneName, String playerTwoName) {
     this.width = template.getWidth();
     this.height = template.getHeight();
     this.isPlayerOneTurn = true;
+    this.playerOne = playerOneName;
+    this.playerTwo = playerTwoName;
     this.scanner = new Scanner(System.in);
 
     template.getConfig().forEach((sc) -> {
@@ -50,7 +55,7 @@ public class Game {
   public void startShipPlacement() {
     out.println("Template locked in");
     for (int i = 0; i < 2; i++) {
-      String currentPlayer = i == 0 ? "1" : "2";
+      String currentPlayer = i == 0 ? playerOne : playerTwo;
       out.println("\nPlease hand the device to Player " + currentPlayer);
       out.println("Press enter to continue");
       scanner.nextLine();
@@ -126,10 +131,9 @@ public class Game {
 
   public void startGame() {
     while(true){
-      //TODO: Later make this an attribute to define the players display name 
-      String currentPlayer = isPlayerOneTurn ? "1" : "2";
+      String currentPlayer = isPlayerOneTurn ? playerOne : playerTwo;
       // reminder to hand over the device
-      out.println("Please hand the device to Player " + currentPlayer);
+      out.println("Please hand the device to  " + currentPlayer);
       out.println("Press enter to continue");
       scanner.nextLine();
 
@@ -152,7 +156,7 @@ public class Game {
 
     System.out.println("(type 'help' if you dont know how to hit ships)\n");
     while (true) {
-      printBattlefields();
+      printBattlefields(playerOne, playerTwo);
       out.println("Type the coordinates of the enemies field that you want to hit:");
       String input = scanner.nextLine().trim().toLowerCase();
 
@@ -216,7 +220,7 @@ public class Game {
     }
   }
 
-  private void printBattlefields() {
+  private void printBattlefields(String playerOneName, String playerTwoName) {
     String[] currentPlayersBoard;
     String[] enemyBoard;
     String currentPlayersBoardHeader;
@@ -226,14 +230,14 @@ public class Game {
       currentPlayersBoard = player1Battlefield.convertBattlefieldToText().split("\n");
       enemyBoard = player2Battlefield.convertBattlefieldToText().split("\n");
 
-      currentPlayersBoardHeader = "Player 1";
-      enemyBoardHeader = "Player 2";
+      currentPlayersBoardHeader = playerOneName;
+      enemyBoardHeader = playerTwoName;
     } else {
       currentPlayersBoard = player2Battlefield.convertBattlefieldToText().split("\n");
       enemyBoard = player1Battlefield.convertBattlefieldToText().split("\n");
 
-      currentPlayersBoardHeader = "Player 2";
-      enemyBoardHeader = "Player 1";
+      currentPlayersBoardHeader = playerTwoName;
+      enemyBoardHeader = playerOneName;
     }
 
     currentPlayersBoardHeader += " (you)";
@@ -249,6 +253,19 @@ public class Game {
   }
 
   public static void clearScreen() {
-    System.out.print("\u001B[2J\u001B[3J");
+    try { 
+    String os = System.getProperty("os.name").toLowerCase();
+    ProcessBuilder pb;
+    if (os.contains("win")) {
+        pb = new ProcessBuilder("cmd", "/c", "cls");
+    } else {
+        pb = new ProcessBuilder("clear");
+    }
+    pb.inheritIO().start().waitFor();
+
+    } catch (IOException | InterruptedException e) {
+      out.print("\u001B[2J\u001B[3J");
+    }
+    
   }
 }
