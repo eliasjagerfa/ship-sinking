@@ -65,27 +65,33 @@ public class Game {
       int shipsPlaced = 0;
       int shipsPlacedBefore = 0;
 
-      out.println("You can now place ships on your battlefield. (if you dont know how to place ships, type 'help')");
+      out.println("You can now place ships on your battlefield.\n");
 
       while (totalShipsToPlace != shipsPlaced) {
         if(shipsPlacedBefore != shipsPlaced) {
-          out.println("Ship placed successfully");
-          out.println("You have " + (totalShipsToPlace - shipsPlaced) + " left to place\n");
+          out.println("You have " + (totalShipsToPlace - shipsPlaced) + " ship(s) left to place in total");
           shipsPlacedBefore = shipsPlaced;
         }
+        out.println("\nIf you dont know how to place ships, type 'help'");
+        out.println("if you want to know each ship you have to place, type 'status'");
         out.print("Enter your ships position: ");
+
 
         String input = scanner.nextLine().toLowerCase().trim();
         out.println();
 
-        // TODO: add a command to show which ships are left to place and how many of each size, which can be done by printing the shipsLeftToPlace hashmap in a nice format, which would be helpful for the user to keep track of which ships they have already placed and which ones they still have to place
-        // Additionally after a ship has been placed successfully, it would be nice to say which ship has been placed and how many of that length are left
-        // But you could also make it print automatically after every successful ship placement, although this might be a bit too much information for the user, so maybe only print it when the user types a command like "status" or something like that
         if (input.equals("help")) {
           out.println("To place a ship, type in the following format: 'x y length orientation'");
           out.println("x and y are the coordinates of the starting point of the ship, length is the length of the ship and orientation is either 'h' for horizontal or 'v' for vertical");
           out.println("Example: '0 0 3 h' would place a ship of length 3 horizontally starting at the bottom left corner of the battlefield");
           out.println("You can only place ships within the bounds of the battlefield and they cannot overlap\n");
+          continue;
+        }
+
+        if (input.equals("status")) {
+          shipsLeftToPlace.forEach((length, amount) -> {
+            out.println("You have " + amount + "ship(s) of length " + length + " left to place");
+          });
           continue;
         }
 
@@ -106,6 +112,8 @@ public class Game {
                 player1Battlefield.setShip(newShip, shipsPlaced);
                 shipsPlaced++;
                 shipsLeftToPlace.merge(length, -1, Integer::sum);
+                out.println("Ship placed successfully");
+                out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
               } else {
                 out.println("Ship goes outside the battlefield. Try again!");
               }
@@ -114,6 +122,8 @@ public class Game {
                 player2Battlefield.setShip(newShip, shipsPlaced);
                 shipsPlaced++;
                 shipsLeftToPlace.merge(length, -1, Integer::sum);
+                out.println("Ship placed successfully");
+                out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
               }
             }
           } else {
