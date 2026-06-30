@@ -107,25 +107,17 @@ public class Game {
             String rotation = matcher.group(4);
             Ship newShip = new Ship(x, y, length, rotation.equals("h"));
 
-            if (i == 0) {
-              if (player1Battlefield.areShipPositionsValid(newShip)) {
-                player1Battlefield.setShip(newShip, shipsPlaced);
-                shipsPlaced++;
-                shipsLeftToPlace.merge(length, -1, Integer::sum);
-                out.println("Ship placed successfully");
-                out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
-              } else {
-                out.println("Ship goes outside the battlefield. Try again!");
-              }
-            } else {
-              if (player2Battlefield.areShipPositionsValid(newShip)) {
-                player2Battlefield.setShip(newShip, shipsPlaced);
-                shipsPlaced++;
-                shipsLeftToPlace.merge(length, -1, Integer::sum);
-                out.println("Ship placed successfully");
-                out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
-              }
+            boolean wasShipPlaced = (i == 0) 
+              ? player1Battlefield.setShip(newShip, shipsPlaced)
+              : player2Battlefield.setShip(newShip, shipsPlaced);
+
+            if (wasShipPlaced) {
+              shipsPlaced++;
+              shipsLeftToPlace.merge(length, -1, Integer::sum);
+              out.println("Ship placed successfully");
+              out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
             }
+            
           } else {
             out.println("No ships of this size can be placed\n");
           }
