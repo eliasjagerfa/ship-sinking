@@ -56,6 +56,8 @@ public class Game {
     out.println("Template locked in");
     for (int i = 0; i < 2; i++) {
       String currentPlayer = i == 0 ? playerOne : playerTwo;
+      Battlefield currentPlayersBattlefield = i == 0 ? player1Battlefield : player2Battlefield;
+
       out.println("\nPlease hand the device to Player " + currentPlayer);
       out.println("Press enter to continue");
       scanner.nextLine();
@@ -73,8 +75,11 @@ public class Game {
           shipsPlacedBefore = shipsPlaced;
         }
         out.println("\nIf you dont know how to place ships, type 'help'");
-        out.println("if you want to know each ship you have to place, type 'status'");
-        out.print("Enter your ships position: ");
+        out.println("if you want to know each ship you have to place, type 'status'\n");
+
+        System.out.println(currentPlayersBattlefield.convertBattlefieldToText(true));
+
+        out.print("\nEnter your ships position: ");
 
 
         String input = scanner.nextLine().toLowerCase().trim();
@@ -92,6 +97,7 @@ public class Game {
           shipsLeftToPlace.forEach((length, amount) -> {
             out.println("You have " + amount + "ship(s) of length " + length + " left to place");
           });
+          
           continue;
         }
 
@@ -117,7 +123,7 @@ public class Game {
               out.println("Ship placed successfully");
               out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
             }
-            
+
           } else {
             out.println("No ships of this size can be placed\n");
           }
