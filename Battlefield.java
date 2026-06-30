@@ -26,23 +26,10 @@ public class Battlefield {
         }
     }
 
-    public void setShip(Ship ship, int shipId) {
+    public boolean setShip(Ship ship, int shipId) {
         ArrayList<int[]> csps = new ArrayList(ship.length);
-        for(int position : ship.getPositions()) {
-            if(ship.isHorizontal) {
-                coordinateSystem[position][ship.y] = String.format("%d", shipId);
-                occupiedFields++;
-                csps.add(new int[] {position, ship.y});
-            } else {
-                coordinateSystem[ship.x][position] = String.format("%d", shipId);
-                occupiedFields++;
-                csps.add(new int[] {ship.x, position});
-            }
-        }
-        calculatedShipsPositions[shipId] = csps;
-    }
+        int[] shipPositions = ship.getPositions();
 
-    public boolean areShipPositionsValid(Ship ship) {
         for(int position : ship.getPositions()) {
             boolean isInBounds = ship.isHorizontal 
                 ? position <= width && position >= 0
@@ -57,8 +44,22 @@ public class Battlefield {
                 return false;
             } else if(isOverlapping) {
                 System.out.println("Ship overlaps with another. Try again!");
+                return false;
             }
         }
+
+        for(int position : shipPositions) {
+            if(ship.isHorizontal) {
+                coordinateSystem[position][ship.y] = String.format("%d", shipId);
+                occupiedFields++;
+                csps.add(new int[] {position, ship.y});
+            } else {
+                coordinateSystem[ship.x][position] = String.format("%d", shipId);
+                occupiedFields++;
+                csps.add(new int[] {ship.x, position});
+            }
+        }
+        calculatedShipsPositions[shipId] = csps;
         return true;
     }
 
