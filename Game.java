@@ -1,28 +1,24 @@
 import java.io.IOException;
 import static java.lang.System.out;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Game {
-  final int width;
-  final int height;
-  private Battlefield player1Battlefield;
-  private Battlefield player2Battlefield;
+  private final Battlefield player1Battlefield;
+  private final Battlefield player2Battlefield;
   private boolean isPlayerOneTurn;
   final String playerOne;
   final String playerTwo;
   private final Scanner scanner;
   private int totalShipsToPlace  = 0;
-  private final ArrayList<int[]>[] shipsPositions;
   private HashMap<Integer, Integer> shipsToPlace = new HashMap<>();
 
 
   public Game(GameTemplate template, String playerOneName, String playerTwoName) {
-    this.width = template.getWidth();
-    this.height = template.getHeight();
+    int width = template.getWidth();
+    int height = template.getHeight();
     this.isPlayerOneTurn = true;
     this.playerOne = playerOneName;
     this.playerTwo = playerTwoName;
@@ -35,17 +31,6 @@ public class Game {
 
     this.player1Battlefield = new Battlefield(width, height, totalShipsToPlace);
     this.player2Battlefield = new Battlefield(width, height, totalShipsToPlace);
-    
-    this.shipsPositions = new ArrayList[shipsToPlace.size()];
-    for (int i = 0; i < shipsPositions.length; i++) {
-      shipsPositions[i] = new ArrayList<>();
-    }
-  }
-
-  public void restartGame() {
-    this.player1Battlefield = new Battlefield(width, height, totalShipsToPlace);
-    this.player2Battlefield = new Battlefield(width, height, totalShipsToPlace);
-    this.isPlayerOneTurn = true;
   }
 
   public void closeScanner() {
@@ -103,7 +88,7 @@ public class Game {
 
         Pattern pattern = Pattern.compile("^(\\d+) (\\d+) (\\d+) ([hv])$");
         Matcher matcher = pattern.matcher(input);
-
+        //TODO: Auslagern von den checks in eigene Methoden
         if (matcher.matches()) {
           int length = Integer.parseInt(matcher.group(3));
           int amountShipOfLength = shipsLeftToPlace.getOrDefault(length, 0);
@@ -111,11 +96,12 @@ public class Game {
             int x = Integer.parseInt(matcher.group(1));
             int y = Integer.parseInt(matcher.group(2));
             String rotation = matcher.group(4);
+            //TODO: Davor sollten alle positionen schon valid sein
             Ship newShip = new Ship(x, y, length, rotation.equals("h"));
 
             boolean wasShipPlaced = (i == 0) 
-              ? player1Battlefield.setShip(newShip, shipsPlaced)
-              : player2Battlefield.setShip(newShip, shipsPlaced);
+              ? player1Battlefield.addShip(newShip, shipsPlaced)
+              : player2Battlefield.addShip(newShip, shipsPlaced);
 
             if (wasShipPlaced) {
               shipsPlaced++;
@@ -156,7 +142,6 @@ public class Game {
     String winner = isPlayerOneTurn ? "1" : "2";
     System.out.println("You sunk the last ship!\n");
     out.print("Player " + winner + " has won!");
-    restartGame();
   }
 
   public GameTypes.DoTurnResult doTurn() {
@@ -251,7 +236,7 @@ public class Game {
     currentPlayersBoardHeader += " (you)";
     enemyBoardHeader += " (enemy)";
 
-    int distance = Math.max(width * 4, currentPlayersBoardHeader.length()) + 4;
+    int distance = Math.max(player1Battlefield.getWidth() * 4, currentPlayersBoardHeader.length()) + 4;
 
     System.out.printf("%-" + (distance) + "s%s\n", currentPlayersBoardHeader, enemyBoardHeader);
 

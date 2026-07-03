@@ -1,33 +1,33 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 public class Battlefield {
-    final int width;
-    final int height;
+    private final int width;
+    private final int height;
     private final String[][] coordinateSystem;
-    private int shipHitFields = 0;
-    private int occupiedFields;
-    private final ArrayList<int[]>[] calculatedShipsPositions;
+    private int toHit = 10;
+    private final List<List<GameTypes.Point>> shipsPositions;
 
     private final static String[] textBlocks = {"+", "---", "|"};
-
+    
     public Battlefield(int width, int height, int shipsToPlace) {
         this.width = width;
         this.height = height;
         this.coordinateSystem = new String[width][height];
         for(String[] row : coordinateSystem){
-            Arrays.fill(row, "free");
+            Arrays.fill(row, "");
         }
 
-        this.calculatedShipsPositions = new ArrayList[shipsToPlace];
-        for (int i = 0; i < calculatedShipsPositions.length; i++) {
-            calculatedShipsPositions[i] = new ArrayList<>();
+        this.shipsPositions = new ArrayList<>(shipsToPlace);
+        for (int i = 0; i < shipsToPlace; i++) {
+            shipsPositions.add(new ArrayList<>());
         }
     }
 
-    public boolean setShip(Ship ship, int shipId) {
-        ArrayList<int[]> csps = new ArrayList(ship.length);
+    public boolean addShip(Ship ship, int placedShipCount) {
+        GameTypes.Point posi;
         int[] shipPositions = ship.getPositions();
 
         for(int position : ship.getPositions()) {
@@ -50,16 +50,16 @@ public class Battlefield {
 
         for(int position : shipPositions) {
             if(ship.isHorizontal) {
-                coordinateSystem[position][ship.y] = String.format("%d", shipId);
-                occupiedFields++;
-                csps.add(new int[] {position, ship.y});
+                coordinateSystem[position][ship.y] = String.format("%d", placedShipCount + 1);
+                posi = new GameTypes.Point(position, ship.y);
+                shipsPositions.get(placedShipCount).add(posi);
             } else {
-                coordinateSystem[ship.x][position] = String.format("%d", shipId);
-                occupiedFields++;
-                csps.add(new int[] {ship.x, position});
+                coordinateSystem[ship.x][position] = String.format("%d", placedShipCount + 1);
+                posi = new GameTypes.Point(ship.x, position);
+                shipsPositions.get(placedShipCount).add(posi);
             }
         }
-        calculatedShipsPositions[shipId] = csps;
+        
         return true;
     }
 
@@ -76,14 +76,14 @@ public class Battlefield {
             String newFieldValue = "shipHit_" + shotField;
             
             coordinateSystem[x][y] = newFieldValue;
-            this.shipHitFields++;
+            toHit--;
 
-            ArrayList<int[]> shipPositions = calculatedShipsPositions[shipId];
+            List<GameTypes.Point> shipPositions = shipsPositions.get(shipId);
 
             boolean isShipSunken = true; 
 
-            for(int[] coordinates : shipPositions) {
-                String fieldValue = coordinateSystem[coordinates[0]][coordinates[1]];
+            for(GameTypes.Point coordinates : shipPositions) {
+                String fieldValue = coordinateSystem[coordinates.x()][coordinates.y()];
 
                 if (parseShipId(fieldValue) >= 0) {
                     isShipSunken = false;
@@ -92,17 +92,17 @@ public class Battlefield {
             }
 
             return new GameTypes.HitShipResult(shotField, newFieldValue, true, isShipSunken);
-        } else if(shotField.equals("free")) {
+        } else if(shotField.equals("")) {
             coordinateSystem[x][y] = "emptyHit";
 
-            return new GameTypes.HitShipResult("free", "emptyHit", false, false);
+            return new GameTypes.HitShipResult("", "emptyHit", false, false);
         }
 
         return new GameTypes.HitShipResult(shotField, shotField, false, false);
     }   
     
     public boolean allAreSunken() {
-        return (shipHitFields == occupiedFields);
+        return toHit == 0;
     }
 
     private int parseShipId(String coordinateSystemValue) {
@@ -163,5 +163,9 @@ public class Battlefield {
 
     public String convertBattlefieldToText() {
         return convertBattlefieldToText(false);
+    }
+
+    public int getWidth() {
+        return width;
     }
 }

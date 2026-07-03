@@ -11,4 +11,9 @@ public class GameTypes {
     boolean isShipHit,
     boolean isShipSunken
   ) {}
+
+  public record Point(
+    int x,
+    int y
+  ) {}
 }
