@@ -12,8 +12,13 @@ public class GameTypes {
     boolean isShipSunken
   ) {}
 
-  public record Point(
+  public record shipCoordinate(
     int x,
     int y
+  ) {}
+
+  public record ShipPositionValidationResult(
+    boolean isOutOfBounds,
+    boolean isOverlapping
   ) {}
 }

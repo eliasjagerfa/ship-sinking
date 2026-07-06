@@ -7,8 +7,8 @@ public class Ship {
   final boolean isHorizontal;
 
   public Ship(int x, int y, int length, boolean isHorizontal) {
-    this.x = x;
-    this.y = y;
+    this.x = x - 1;
+    this.y = y - 1;
     this.length = length;
     this.isHorizontal = isHorizontal;
   }

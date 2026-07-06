@@ -7,8 +7,9 @@ public class Battlefield {
     private final int width;
     private final int height;
     private final String[][] coordinateSystem;
+    //TODO: toHit auch hochzählen lassen, nicht statisch
     private int toHit = 10;
-    private final List<List<GameTypes.Point>> shipsPositions;
+    private final List<List<GameTypes.shipCoordinate>> shipsPositions;
 
     private final static String[] textBlocks = {"+", "---", "|"};
     
@@ -27,40 +28,41 @@ public class Battlefield {
     }
 
     public boolean addShip(Ship ship, int placedShipCount) {
-        GameTypes.Point posi;
+        GameTypes.shipCoordinate posi;
         int[] shipPositions = ship.getPositions();
-
-        for(int position : ship.getPositions()) {
-            boolean isInBounds = ship.isHorizontal 
-                ? position <= width && position >= 0
-                : position <= height && position >= 0;
-
-            boolean isOverlapping = ship.isHorizontal 
-                ? parseShipId(coordinateSystem[position][ship.y]) >= 0
-                : parseShipId(coordinateSystem[ship.x][position]) >= 0;
-
-            if(!isInBounds) {
-                System.out.println("Ship goes outside the battleship. Try again!");
-                return false;
-            } else if(isOverlapping) {
-                System.out.println("Ship overlaps with another. Try again!");
-                return false;
-            }
-        }
 
         for(int position : shipPositions) {
             if(ship.isHorizontal) {
                 coordinateSystem[position][ship.y] = String.format("%d", placedShipCount + 1);
-                posi = new GameTypes.Point(position, ship.y);
+                posi = new GameTypes.shipCoordinate(position, ship.y);
                 shipsPositions.get(placedShipCount).add(posi);
             } else {
                 coordinateSystem[ship.x][position] = String.format("%d", placedShipCount + 1);
-                posi = new GameTypes.Point(ship.x, position);
+                posi = new GameTypes.shipCoordinate(ship.x, position);
                 shipsPositions.get(placedShipCount).add(posi);
             }
         }
         
         return true;
+    }
+
+    public GameTypes.ShipPositionValidationResult validateShipPositions(Ship ship) {
+        for(int position : ship.getPositions()) {
+            boolean isOutOfBounds = position > width || position > height || position < 0;
+
+            if(isOutOfBounds) {
+                return new GameTypes.ShipPositionValidationResult(isOutOfBounds, false);
+            }
+
+            boolean isOverlapping = ship.isHorizontal 
+                ? parseShipId(coordinateSystem[position][ship.y]) >= 0
+                : parseShipId(coordinateSystem[ship.x][position]) >= 0;
+
+            if(isOverlapping) {
+                return new GameTypes.ShipPositionValidationResult(false, isOverlapping);
+            }
+        }
+        return new GameTypes.ShipPositionValidationResult(false, false);
     }
 
     public GameTypes.HitShipResult hitField(int x, int y) {
@@ -78,11 +80,11 @@ public class Battlefield {
             coordinateSystem[x][y] = newFieldValue;
             toHit--;
 
-            List<GameTypes.Point> shipPositions = shipsPositions.get(shipId);
+            List<GameTypes.shipCoordinate> shipPositions = shipsPositions.get(shipId);
 
             boolean isShipSunken = true; 
 
-            for(GameTypes.Point coordinates : shipPositions) {
+            for(GameTypes.shipCoordinate coordinates : shipPositions) {
                 String fieldValue = coordinateSystem[coordinates.x()][coordinates.y()];
 
                 if (parseShipId(fieldValue) >= 0) {
