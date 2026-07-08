@@ -16,7 +16,7 @@ public class Ship {
   public int[] getPositions() {
     int[] positions = new int[length];
     IntStream.range(0, length)
-            .forEach(i -> positions[i] = (int)(isHorizontal ? x + i : y + i));
+            .forEach(i -> positions[i] = isHorizontal ? x + i : y + i);
     return positions;
   }
 }

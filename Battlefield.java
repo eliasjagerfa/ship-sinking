@@ -1,19 +1,19 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class Battlefield {
     private final int width;
     private final int height;
     private final String[][] coordinateSystem;
-    //TODO: toHit auch hochzählen lassen, nicht statisch
-    private int toHit = 10;
+    private int toHit;
     private final List<List<GameTypes.shipCoordinate>> shipsPositions;
 
     private final static String[] textBlocks = {"+", "---", "|"};
     
-    public Battlefield(int width, int height, int shipsToPlace) {
+    public Battlefield(int width, int height, Map<Integer, Integer> shipsToPlace) {
         this.width = width;
         this.height = height;
         this.coordinateSystem = new String[width][height];
@@ -21,10 +21,13 @@ public class Battlefield {
             Arrays.fill(row, "");
         }
 
-        this.shipsPositions = new ArrayList<>(shipsToPlace);
-        for (int i = 0; i < shipsToPlace; i++) {
-            shipsPositions.add(new ArrayList<>());
-        }
+        this.shipsPositions = new ArrayList<>();
+        shipsToPlace.forEach((length, amount) -> {
+            toHit += length * amount;
+            for (int i = 0; i < amount; i++) {
+                shipsPositions.add(new ArrayList<>());
+            }
+        });
     }
 
     public boolean addShip(Ship ship, int placedShipCount) {
@@ -48,7 +51,7 @@ public class Battlefield {
 
     public GameTypes.ShipPositionValidationResult validateShipPositions(Ship ship) {
         for(int position : ship.getPositions()) {
-            boolean isOutOfBounds = position > width || position > height || position < 0;
+            boolean isOutOfBounds = position >= width || position >= height || position < 0;
 
             if(isOutOfBounds) {
                 return new GameTypes.ShipPositionValidationResult(isOutOfBounds, false);
@@ -68,7 +71,7 @@ public class Battlefield {
     public GameTypes.HitShipResult hitField(int x, int y) {
         String shotField;
         try {
-            shotField = coordinateSystem[x][y];
+            shotField = coordinateSystem[x - 1][y - 1];
         } catch (Exception e) {
             throw new IllegalArgumentException("Out of bounds: " + x + ", " + y);
         }
@@ -77,10 +80,10 @@ public class Battlefield {
         if(shipId >= 0) {
             String newFieldValue = "shipHit_" + shotField;
             
-            coordinateSystem[x][y] = newFieldValue;
+            coordinateSystem[x - 1][y - 1] = newFieldValue;
             toHit--;
 
-            List<GameTypes.shipCoordinate> shipPositions = shipsPositions.get(shipId);
+            List<GameTypes.shipCoordinate> shipPositions = shipsPositions.get(shipId - 1);
 
             boolean isShipSunken = true; 
 
@@ -115,6 +118,8 @@ public class Battlefield {
         }
     }
 
+    //TODO: unanfällig für 2-stellige Zahlen machen
+    //TODO: überlegen, ob vom eigenen Feld auch in der Hitphase noch die Schiffe gesehen werden können sollen oder nicht
     public String convertBattlefieldToText(boolean showHiddenShips) {
         Function<String, String> mapFieldToText = (field) -> {
             if ("emptyHit".equals(field)) return "x";
