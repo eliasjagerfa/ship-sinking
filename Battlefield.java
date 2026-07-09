@@ -118,21 +118,20 @@ public class Battlefield {
         }
     }
 
-    //TODO: unanfällig für 2-stellige Zahlen machen
     //TODO: überlegen, ob vom eigenen Feld auch in der Hitphase noch die Schiffe gesehen werden können sollen oder nicht
     public String convertBattlefieldToText(boolean showHiddenShips) {
         Function<String, String> mapFieldToText = (field) -> {
             if ("emptyHit".equals(field)) return "x";
             
             if (showHiddenShips && parseShipId(field) >= 0) {
-                return field;
+                return parseShipId(field)< 10 ? field + " " : field;
             }
 
             if (field.startsWith("shipHit_")) {
                 return field.replaceAll("[^0-9]", "");
             }
 
-            return " ";
+            return "  ";
         };
     
         String[] mappedBattlefieldRows = new String[height];
@@ -154,7 +153,7 @@ public class Battlefield {
 
         String lineSeparator =
             textBlocks[0] +
-            (textBlocks[1] + textBlocks[0]).repeat(width);
+            (textBlocks[1] + " " + textBlocks[0]).repeat(width);
 
         StringBuilder sb = new StringBuilder();
 
