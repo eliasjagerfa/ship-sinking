@@ -72,9 +72,9 @@ public class Battlefield {
             }
         }
         
-        for (int i = 0; i < shipLength; i++) {
-            shipsPositions.remove(parseShipId(shipId));
-        }
+        
+        shipsPositions.remove(parseShipId(shipId));
+
         return new GameTypes.RemovalResult(false, false, parseShipId(shipId), shipLength);
     }
 
