@@ -1,22 +1,17 @@
+package game;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class Battlefield {
-    private final int width;
-    private final int height;
     private final String[][] coordinateSystem;
     private int toHit;
     private final List<List<GameTypes.shipCoordinate>> shipsPositions;
-
-    private final static String[] textBlocks = {"+", "---", "|"};
     
-    public Battlefield(int width, int height, Map<Integer, Integer> shipsToPlace) {
-        this.width = width;
-        this.height = height;
-        this.coordinateSystem = new String[width][height];
+    public Battlefield(int size, Map<Integer, Integer> shipsToPlace) {
+        this.coordinateSystem = new String[size][size];
         for(String[] row : coordinateSystem){
             Arrays.fill(row, "");
         }
@@ -30,7 +25,9 @@ public class Battlefield {
         });
     }
 
-    public boolean addShip(Ship ship, int placedShipCount) {
+    public GameTypes.ShipPositionValidationResult addShip(Ship ship, int placedShipCount) {
+        GameTypes.ShipPositionValidationResult validationResult = validateShipPositions(ship);
+        if (validationResult.isOutOfBounds() || validationResult.isOverlapping()) return validationResult;
         GameTypes.shipCoordinate posi;
         int[] shipPositions = ship.getPositions();
 
@@ -46,12 +43,31 @@ public class Battlefield {
             }
         }
         
-        return true;
+        return new GameTypes.ShipPositionValidationResult(false, false);
+    }
+
+    //TODO: finish ts
+    public void removeShip(int x, int y) {
+        String shipId = coordinateSystem[x][y];
+        int shipLength = 0;
+
+        for (int rowIndex = 0; rowIndex < coordinateSystem.length; rowIndex++) {
+            List<String> foundShipIds = 
+                Arrays.stream(coordinateSystem[rowIndex])
+                    .filter(fieldValue -> fieldValue.equals(shipId))
+                    .toList();
+                    
+            shipLength += foundShipIds.size();
+        }
+        
+        
+        var posi = new GameTypes.shipCoordinate(x, y);
+        //shipsPositions.get(shipId - 1).remove(posi);
     }
 
     public GameTypes.ShipPositionValidationResult validateShipPositions(Ship ship) {
         for(int position : ship.getPositions()) {
-            boolean isOutOfBounds = position >= width || position >= height || position < 0;
+            boolean isOutOfBounds = position >= coordinateSystem.length || position >= coordinateSystem.length || position < 0;
 
             if(isOutOfBounds) {
                 return new GameTypes.ShipPositionValidationResult(isOutOfBounds, false);
@@ -68,6 +84,7 @@ public class Battlefield {
         return new GameTypes.ShipPositionValidationResult(false, false);
     }
 
+    //TODO: implement initial checks and validate if it was already shot at
     public GameTypes.HitShipResult hitField(int x, int y) {
         String shotField;
         try {
@@ -110,68 +127,19 @@ public class Battlefield {
         return toHit == 0;
     }
 
-    private int parseShipId(String coordinateSystemValue) {
+    int parseShipId(String fieldValue) {
         try {
-            return Integer.parseInt(coordinateSystemValue);
+            return Integer.parseInt(fieldValue);
         } catch (NumberFormatException err) {
             return -1;
         }
     }
 
-    //TODO: überlegen, ob vom eigenen Feld auch in der Hitphase noch die Schiffe gesehen werden können sollen oder nicht
-    public String convertBattlefieldToText(boolean showHiddenShips) {
-        Function<String, String> mapFieldToText = (field) -> {
-            if ("emptyHit".equals(field)) return "x";
-            
-            if (showHiddenShips && parseShipId(field) >= 0) {
-                return parseShipId(field)< 10 ? field + " " : field;
-            }
-
-            if (field.startsWith("shipHit_")) {
-                return field.replaceAll("[^0-9]", "");
-            }
-
-            return "  ";
-        };
-    
-        String[] mappedBattlefieldRows = new String[height];
-
-        for (int i = 0; i < height; i++) {
-            int rowIndex = height - i - 1;
-
-            StringBuilder rowSb = new StringBuilder();
-
-            rowSb.append(textBlocks[2]);
-
-            for (int colIndex = 0; colIndex < width; colIndex++) {
-                String convertedField = mapFieldToText.apply(coordinateSystem[colIndex][rowIndex]);
-                rowSb.append(String.format(" %s %s", convertedField, textBlocks[2]));
-            }
-
-            mappedBattlefieldRows[i] = rowSb.toString();
-        }
-
-        String lineSeparator =
-            textBlocks[0] +
-            (textBlocks[1] + " " + textBlocks[0]).repeat(width);
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(lineSeparator).append("\n");
-
-        for (String mappedRow: mappedBattlefieldRows) {
-            sb.append(mappedRow).append("\n");
-            sb.append(lineSeparator).append("\n");
-        }
-
-        return sb.toString();
-    }
-
-    public String convertBattlefieldToText() {
-        return convertBattlefieldToText(false);
-    }
-
     public int getWidth() {
-        return width;
+        return coordinateSystem.length;
+    }
+
+    public String[][] getCoordinateSystem() {
+        return coordinateSystem;
     }
 }
