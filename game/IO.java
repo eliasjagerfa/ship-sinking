@@ -29,6 +29,8 @@ interface IO {
 
     void outputOverlapping();
 
+    void outputNoShipToRemove();
+
     void outputSuccessfulShipPlacement(Map<Integer, Integer> shipsLeftToPlace, int length);
 
     void outputShipRemovalConfirmation();

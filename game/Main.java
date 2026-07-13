@@ -5,7 +5,7 @@ public class Main {
 
   private void run() {
     GameTypes.Config gameMode = io.inputGameConfig();
-    Game myGame = new Game(gameMode, io); //TODO: Mit Tomas besprechen (des io Thema)
+    Game myGame = new Game(gameMode, io);
     myGame.startGame();
   }
     

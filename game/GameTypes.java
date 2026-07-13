@@ -29,6 +29,12 @@ public class GameTypes {
     boolean isOverlapping
   ) {}
 
+  public record RemovalResult(
+    boolean isOutOfBounds,
+    boolean isEmptyField,
+    Integer freedShipId
+  ) {}
+
   public record shipCoordinate(
     int x,
     int y

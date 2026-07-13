@@ -1,7 +1,10 @@
 package game;
 
 import static java.lang.System.out;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Game {
@@ -35,17 +38,24 @@ public class Game {
 
       if (!isPlayerOneTurn) io.outputAllShipsSuccessfullyPlaced();
       io.outputPromptDeviceHandover(currentPlayer);
+
       Map<Integer, Integer> shipsLeftToPlace = new HashMap<>(shipsToPlace);
+      
+      List<Integer> freeShipIds = new ArrayList<>();
+      for (int j = 0; j < totalShipsToPlace; j++) {
+        freeShipIds.add(j + 1);
+      }
+
       int shipsPlaced = 0;
       int shipsPlacedBefore = 0;
 
       io.outputInitialShipPlacementMessage();
 
       while (totalShipsToPlace != shipsPlaced) {
-        GameTypes.ShipPositionInput result = io.inputShipPositions(currentBattleField, shipsPlacedBefore, shipsPlaced, totalShipsToPlace);
+        GameTypes.ShipPositionInput inputResult = io.inputShipPositions(currentBattleField, shipsPlacedBefore, shipsPlaced, totalShipsToPlace);
         shipsPlacedBefore = shipsPlaced;
 
-        switch (result.prefix()) {
+        switch (inputResult.prefix()) {
           case "help" -> {
             io.outputShipPlacementHelp();
             continue;
@@ -62,17 +72,27 @@ public class Game {
             continue;
           }
           case "delete" -> {
-            //TODO: Outputhandling, when there is no ship or the coordinates are outOfBounds
-            currentBattleField.removeShip(result.x(), result.y());
+            GameTypes.RemovalResult removalResult = currentBattleField.removeShip(inputResult.x(), inputResult.y());
+
+            if (removalResult.isOutOfBounds()) {
+              io.outputOutOfBounds();
+            } else if (removalResult.isEmptyField()) {
+              io.outputNoShipToRemove();
+            } else {
+              freeShipIds.add(removalResult.freedShipId());
+              Collections.sort(freeShipIds);
+              shipsPlaced--;
+              shipsLeftToPlace.merge(removalResult.freedShipId(), +1, Integer::sum);
+            }
             continue;
           }
         }
 
-        int amountShipOfLength = shipsLeftToPlace.getOrDefault(result.length(), 0);
+        int amountShipOfLength = shipsLeftToPlace.getOrDefault(inputResult.length(), 0);
         if (amountShipOfLength > 0) {
-          Ship newShip = new Ship(result.x(), result.y(), result.length(), result.rotation().equals("h"));  
+          Ship newShip = new Ship(inputResult.x(), inputResult.y(), inputResult.length(), inputResult.rotation().equals("h"));  
 
-          GameTypes.ShipPositionValidationResult validationResult = currentBattleField.addShip(newShip, shipsPlaced);
+          GameTypes.ShipPositionValidationResult validationResult = currentBattleField.addShip(newShip, shipsPlaced, freeShipIds.get(0));
           
           if (validationResult.isOutOfBounds()) {
             io.outputOutOfBounds();
@@ -83,9 +103,10 @@ public class Game {
           }
 
           shipsPlaced++;
-          shipsLeftToPlace.merge(result.length(), -1, Integer::sum);
+          shipsLeftToPlace.merge(inputResult.length(), -1, Integer::sum);
+          freeShipIds.remove(0);
 
-          if (shipsPlaced != totalShipsToPlace) io.outputSuccessfulShipPlacement(shipsLeftToPlace, result.length());
+          if (shipsPlaced != totalShipsToPlace) io.outputSuccessfulShipPlacement(shipsLeftToPlace, inputResult.length());
         } else {
           io.outputInvalidShipSize();
         }

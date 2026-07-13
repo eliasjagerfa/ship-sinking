@@ -25,7 +25,7 @@ public class Battlefield {
         });
     }
 
-    public GameTypes.ShipPositionValidationResult addShip(Ship ship, int placedShipCount) {
+    public GameTypes.ShipPositionValidationResult addShip(Ship ship, int placedShipCount, Integer freeShipId) {
         GameTypes.ShipPositionValidationResult validationResult = validateShipPositions(ship);
         if (validationResult.isOutOfBounds() || validationResult.isOverlapping()) return validationResult;
         GameTypes.shipCoordinate posi;
@@ -33,11 +33,11 @@ public class Battlefield {
 
         for(int position : shipPositions) {
             if(ship.isHorizontal) {
-                coordinateSystem[position][ship.y] = String.format("%d", placedShipCount + 1);
+                coordinateSystem[position][ship.y] = String.format("%d", freeShipId);
                 posi = new GameTypes.shipCoordinate(position, ship.y);
                 shipsPositions.get(placedShipCount).add(posi);
             } else {
-                coordinateSystem[ship.x][position] = String.format("%d", placedShipCount + 1);
+                coordinateSystem[ship.x][position] = String.format("%d", freeShipId);
                 posi = new GameTypes.shipCoordinate(ship.x, position);
                 shipsPositions.get(placedShipCount).add(posi);
             }
@@ -47,22 +47,35 @@ public class Battlefield {
     }
 
     //TODO: finish ts
-    public void removeShip(int x, int y) {
-        String shipId = coordinateSystem[x][y];
+    public GameTypes.RemovalResult removeShip(int x, int y) {
+        String shipId = coordinateSystem[x - 1][y - 1];
+
+        boolean isOutOfBounds = x <= 0 && x >= coordinateSystem.length || y <= 0 && y >= coordinateSystem.length;
+        boolean isEmptyField = parseShipId(shipId) < 0;
+        if (isOutOfBounds || isEmptyField) return new GameTypes.RemovalResult(isOutOfBounds, isEmptyField, null);
+
         int shipLength = 0;
 
-        for (int rowIndex = 0; rowIndex < coordinateSystem.length; rowIndex++) {
+        for (int colIndex = 0; colIndex < coordinateSystem.length; colIndex++) {
             List<String> foundShipIds = 
-                Arrays.stream(coordinateSystem[rowIndex])
+                Arrays.stream(coordinateSystem[colIndex])
                     .filter(fieldValue -> fieldValue.equals(shipId))
                     .toList();
                     
             shipLength += foundShipIds.size();
+
+            for (int rowIndex = 0; rowIndex < coordinateSystem.length; rowIndex++) {
+                if (coordinateSystem[colIndex][rowIndex].equals(shipId)) {
+                    coordinateSystem[colIndex][rowIndex] = "";
+                }
+            }
         }
         
-        
-        var posi = new GameTypes.shipCoordinate(x, y);
-        //shipsPositions.get(shipId - 1).remove(posi);
+        for (int i = 0; i < shipLength; i++) {
+            //TODO: there is no way this is correct
+            shipsPositions.remove(parseShipId(shipId));
+        }
+        return new GameTypes.RemovalResult(false, false, parseShipId(shipId));
     }
 
     public GameTypes.ShipPositionValidationResult validateShipPositions(Ship ship) {

@@ -111,7 +111,7 @@ public class ConsoleIO implements IO {
   @Override
   public GameTypes.ShipPositionInput inputShipPositions(Battlefield battlefield, int shipsPlacedBefore, int shipsPlaced, int totalShipsToPlace) {
     if(shipsPlacedBefore != shipsPlaced) {
-      out.println("You have " + (totalShipsToPlace - shipsPlaced) + " ship(s) left to place in total\n" + GREY);
+      out.println(YELLOW + "You have " + (totalShipsToPlace - shipsPlaced) + " ship(s) left to place in total\n" + GREY);
     }
     out.println("if you want to know each ship you have to place, type 'status'");
     out.println("if you want to know how to remove a ship again, type 'help delete'\n");
@@ -142,6 +142,8 @@ public class ConsoleIO implements IO {
         String confirmation = scanner.nextLine().toLowerCase().trim();
       
         if (confirmation.startsWith("y")) {
+          clearScreen();
+
           String formattedInput = input.replace("delete ", "");
           Pattern pattern = Pattern.compile("^(\\d+) (\\d+)$");
           Matcher matcher = pattern.matcher(formattedInput);
@@ -149,17 +151,16 @@ public class ConsoleIO implements IO {
           if (matcher.matches()) {
             int x = Integer.parseInt(matcher.group(1));
             int y = Integer.parseInt(matcher.group(2));
+            out.println(GREEN+ "Removed successfully" + GREY);
             return new GameTypes.ShipPositionInput("delete", x, y, 0, "");
           } else {
             outputInvalidCommand();
-            out.println(YELLOW + "Removal process aborted" + GREY);
+            out.println(RED + "Removal process aborted" + GREY);
             return new GameTypes.ShipPositionInput("removal aborted", 0, 0, 0, "");
           }
         } else if (confirmation.startsWith("n")) {
           clearScreen();
           out.println(YELLOW + "Removal process aborted" + GREY);
-          outputInvalidCommand();
-          out.println("(Type 'help' if you dont know how to hit ships)\n");
           return new GameTypes.ShipPositionInput("removal aborted", 0, 0, 0, "");
         } else {
           outputInvalidCommand();
@@ -267,20 +268,26 @@ public class ConsoleIO implements IO {
   @Override
   public void outputOutOfBounds() {
     clearScreen();
-    System.out.println(RED + "Coordinates go outside the battleship. Try again!" + GREY);
+    out.println(RED + "Coordinates go outside the battleship. Try again!" + GREY);
   }
 
   @Override
   public void outputOverlapping() {
     clearScreen();
-    System.out.println(RED + "Ship overlaps with another. Try again!" + GREY);
+    out.println(RED + "Ship overlaps with another. Try again!" + GREY);
+  }
+
+  @Override
+  public void outputNoShipToRemove() {
+    clearScreen();
+    out.println(RED + "Coordinates must point to a ship");
+    out.println("Removal process aborted" + GREY);
   }
 
   @Override
   public void outputSuccessfulShipPlacement(Map<Integer, Integer> shipsLeftToPlace, int length) {
     clearScreen();
     out.println(GREEN + "Ship placed successfully" + YELLOW);
-    //TODO: insert if, so it doesnt show when all ships have been placed
     out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
   }
 
