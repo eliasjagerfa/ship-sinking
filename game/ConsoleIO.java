@@ -122,8 +122,7 @@ public class ConsoleIO implements IO {
 
     String input = scanner.nextLine().toLowerCase().trim();
     out.println();
-
-    //TODO: add invalidCommand handling for prefix
+    
     if (input.equals("help")) {
       return new GameTypes.ShipPositionInput("help", 0, 0, 0, "");
     }
@@ -182,7 +181,7 @@ public class ConsoleIO implements IO {
       return new GameTypes.ShipPositionInput("", x, y, length, rotation);
     } else {
       outputInvalidCommand();
-      out.println("\nIf you dont know how to place ships, type 'help'");
+      out.println(YELLOW + "If you dont know how to place ships, type 'help'" + GREY);
       return new GameTypes.ShipPositionInput("", 0, 0, 0, "");
     }
   }
@@ -345,6 +344,12 @@ public class ConsoleIO implements IO {
   }
 
   @Override
+  public void outputAlreadyShotAt() {
+    clearScreen();
+    out.println(RED + "You already shot at this field\n" + GREY);
+  }
+
+  @Override
   public void outputEmptyHit() {
     out.println("But no ship was hit :(\n" + GREY);
   }
@@ -358,7 +363,7 @@ public class ConsoleIO implements IO {
     }
 
     out.println("Your current Hitstreak is " + shipsHitStreak);
-    out.println("You can shoot once more!\n" + GREY);
+    out.println("You may shoot again!\n" + GREY);
   }
 
   @Override
@@ -420,7 +425,6 @@ public class ConsoleIO implements IO {
     }  
   }
 
-  //TODO: überlegen, ob vom eigenen Feld auch in der Hitphase noch die Schiffe gesehen werden können sollen oder nicht
   private String convertBattlefieldToText(boolean showHiddenShips, Battlefield battlefield) {
     Function<String, String> mapFieldToText = (field) -> {
       if ("emptyHit".equals(field)) return "x ";

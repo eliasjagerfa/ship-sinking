@@ -46,36 +46,36 @@ public class Battlefield {
         return new GameTypes.ShipPositionValidationResult(false, false);
     }
 
-    //TODO: finish ts
     public GameTypes.RemovalResult removeShip(int x, int y) {
+        boolean isOutOfBounds = x <= 0 || x >= coordinateSystem.length || y <= 0 || y >= coordinateSystem.length;
+        if (isOutOfBounds) return new GameTypes.RemovalResult(isOutOfBounds, false, null, 0);
+
         String shipId = coordinateSystem[x - 1][y - 1];
 
-        boolean isOutOfBounds = x <= 0 && x >= coordinateSystem.length || y <= 0 && y >= coordinateSystem.length;
         boolean isEmptyField = parseShipId(shipId) < 0;
-        if (isOutOfBounds || isEmptyField) return new GameTypes.RemovalResult(isOutOfBounds, isEmptyField, null);
+        if (isEmptyField) return new GameTypes.RemovalResult(false, isEmptyField, null, 0);
 
         int shipLength = 0;
 
-        for (int colIndex = 0; colIndex < coordinateSystem.length; colIndex++) {
+        for (String[] collumn : coordinateSystem) {
             List<String> foundShipIds = 
-                Arrays.stream(coordinateSystem[colIndex])
+                Arrays.stream(collumn)
                     .filter(fieldValue -> fieldValue.equals(shipId))
                     .toList();
                     
             shipLength += foundShipIds.size();
 
             for (int rowIndex = 0; rowIndex < coordinateSystem.length; rowIndex++) {
-                if (coordinateSystem[colIndex][rowIndex].equals(shipId)) {
-                    coordinateSystem[colIndex][rowIndex] = "";
+                if (collumn[rowIndex].equals(shipId)) {
+                    collumn[rowIndex] = "";
                 }
             }
         }
         
         for (int i = 0; i < shipLength; i++) {
-            //TODO: there is no way this is correct
             shipsPositions.remove(parseShipId(shipId));
         }
-        return new GameTypes.RemovalResult(false, false, parseShipId(shipId));
+        return new GameTypes.RemovalResult(false, false, parseShipId(shipId), shipLength);
     }
 
     public GameTypes.ShipPositionValidationResult validateShipPositions(Ship ship) {
@@ -97,14 +97,14 @@ public class Battlefield {
         return new GameTypes.ShipPositionValidationResult(false, false);
     }
 
-    //TODO: implement initial checks and validate if it was already shot at
     public GameTypes.HitShipResult hitField(int x, int y) {
-        String shotField;
-        try {
-            shotField = coordinateSystem[x - 1][y - 1];
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Out of bounds: " + x + ", " + y);
-        }
+        boolean isOutOfBounds = x <= 0 || x > coordinateSystem.length || y <= 0 || y > coordinateSystem.length;
+        if (isOutOfBounds) return new GameTypes.HitShipResult(isOutOfBounds, false, "", "", false, false);
+
+        String shotField = coordinateSystem[x - 1][y - 1];
+
+        boolean isAlreadyShotAt = shotField.contains("Hit");
+        if (isAlreadyShotAt) return new GameTypes.HitShipResult(isOutOfBounds, isAlreadyShotAt, "", "", false, false);
         
         int shipId = parseShipId(shotField);
         if(shipId >= 0) {
@@ -126,14 +126,14 @@ public class Battlefield {
                 }
             }
 
-            return new GameTypes.HitShipResult(shotField, newFieldValue, true, isShipSunken);
+            return new GameTypes.HitShipResult(false, false, shotField, newFieldValue, true, isShipSunken);
         } else if(shotField.equals("")) {
             coordinateSystem[x][y] = "emptyHit";
 
-            return new GameTypes.HitShipResult("", "emptyHit", false, false);
+            return new GameTypes.HitShipResult(false, false, "", "emptyHit", false, false);
         }
 
-        return new GameTypes.HitShipResult(shotField, shotField, false, false);
+        return new GameTypes.HitShipResult(false, false, shotField, shotField, false, false);
     }   
     
     public boolean allAreSunken() {

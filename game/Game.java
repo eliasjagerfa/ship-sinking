@@ -53,6 +53,7 @@ public class Game {
 
       while (totalShipsToPlace != shipsPlaced) {
         GameTypes.ShipPositionInput inputResult = io.inputShipPositions(currentBattleField, shipsPlacedBefore, shipsPlaced, totalShipsToPlace);
+
         shipsPlacedBefore = shipsPlaced;
 
         switch (inputResult.prefix()) {
@@ -71,6 +72,9 @@ public class Game {
           case "removal aborted" -> {
             continue;
           }
+          case "placement aborted" -> {
+            continue;
+          }
           case "delete" -> {
             GameTypes.RemovalResult removalResult = currentBattleField.removeShip(inputResult.x(), inputResult.y());
 
@@ -82,11 +86,13 @@ public class Game {
               freeShipIds.add(removalResult.freedShipId());
               Collections.sort(freeShipIds);
               shipsPlaced--;
-              shipsLeftToPlace.merge(removalResult.freedShipId(), +1, Integer::sum);
+              shipsLeftToPlace.merge(removalResult.length(), +1, Integer::sum);
             }
             continue;
           }
         }
+
+        if (inputResult.length() == 0) continue;
 
         int amountShipOfLength = shipsLeftToPlace.getOrDefault(inputResult.length(), 0);
         if (amountShipOfLength > 0) {
@@ -154,18 +160,23 @@ public class Game {
 
       GameTypes.HitShipResult hitShipResult;
 
-      try {
-        if (isPlayerOneTurn) {
-          hitShipResult = playerTwoBattlefield.hitField(inputResult.x(), inputResult.y());
-        } else {
-          hitShipResult = playerOneBattlefield.hitField(inputResult.x(), inputResult.y());
-        }
-      } catch (Exception e) {
-        //TODO: adjust record to include isOutOfBounds and isAlreadyShotAt and handle the output accordingly
-        io.outputInvalidCommand();
+      
+      if (isPlayerOneTurn) {
+        hitShipResult = playerTwoBattlefield.hitField(inputResult.x(), inputResult.y());
+      } else {
+        hitShipResult = playerOneBattlefield.hitField(inputResult.x(), inputResult.y());
+      }
+    
+      if (hitShipResult.isOutOfBounds()) {
+        io.outputOutOfBounds();
         continue;
       }
 
+      if (hitShipResult.isAlreadyShotAt()) {
+        io.outputAlreadyShotAt();
+        continue;
+      }
+      
       io.outputSelectedFieldToShoot(inputResult.x(), inputResult.y());
       
       if(hitShipResult.newFieldValue().equals("emptyHit")) {
@@ -182,7 +193,6 @@ public class Game {
     }
   }
 
-  //TODO: maybe characterlimit auf 10 setzen?
   public void setPlayerNames() {
     String[] playerNames = io.inputPlayerNames();
 

@@ -41,6 +41,8 @@ interface IO {
 
     void outputSelectedFieldToShoot(int x, int y);
 
+    void outputAlreadyShotAt();
+
     void outputEmptyHit();
 
     void outputShipHit(boolean wasSUnken, int shipsHitStreak);

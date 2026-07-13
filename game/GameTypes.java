@@ -4,6 +4,8 @@ import java.util.Map;
 
 public class GameTypes {
   public record HitShipResult(
+    boolean isOutOfBounds,
+    boolean isAlreadyShotAt,
     String oldFieldValue,
     String newFieldValue,
     boolean isShipHit,
@@ -32,7 +34,8 @@ public class GameTypes {
   public record RemovalResult(
     boolean isOutOfBounds,
     boolean isEmptyField,
-    Integer freedShipId
+    Integer freedShipId,
+    int length
   ) {}
 
   public record shipCoordinate(
