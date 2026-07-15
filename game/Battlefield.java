@@ -128,7 +128,7 @@ public class Battlefield {
 
             return new GameTypes.HitShipResult(false, false, shotField, newFieldValue, true, isShipSunken);
         } else if(shotField.equals("")) {
-            coordinateSystem[x][y] = "emptyHit";
+            coordinateSystem[x - 1][y - 1] = "emptyHit";
 
             return new GameTypes.HitShipResult(false, false, "", "emptyHit", false, false);
         }

@@ -17,7 +17,7 @@ public class ConsoleIO implements IO {
   public final String RED = "\u001B[31m"; //Standard error
   public final String GREEN = "\u001B[32m"; //Standard success
   public final String YELLOW = "\u001b[33m"; //Standard Info highlighter
-
+  public final String BLUE = "\u001B[34m"; //Battlefield color
 
   @Override
   public GameTypes.Config inputGameConfig() {
@@ -116,7 +116,7 @@ public class ConsoleIO implements IO {
     out.println("if you want to know each ship you have to place, type 'status'");
     out.println("if you want to know how to remove a ship again, type 'help delete'\n");
 
-    out.println(convertBattlefieldToText(true, battlefield));
+    out.println(convertBattlefieldToText(true, battlefield, "blue"));
     out.print("\nEnter your ships position: " + RESET);
 
 
@@ -310,14 +310,14 @@ public class ConsoleIO implements IO {
     String enemyBoardHeader;
 
     if (isPlayerOneTurn) {
-      currentPlayersBoard = convertBattlefieldToText(playerOneBattlefield).split("\n");
-      enemyBoard = convertBattlefieldToText(playerTwoBattlefield).split("\n");
+      currentPlayersBoard = convertBattlefieldToText(playerOneBattlefield, "blue").split("\n");
+      enemyBoard = convertBattlefieldToText(playerTwoBattlefield, "red").split("\n");
 
       currentPlayersBoardHeader = playerOneName;
       enemyBoardHeader = playerTwoName;
     } else {
-      currentPlayersBoard = convertBattlefieldToText(playerTwoBattlefield).split("\n");
-      enemyBoard = convertBattlefieldToText(playerOneBattlefield).split("\n");
+      currentPlayersBoard = convertBattlefieldToText(playerTwoBattlefield, "blue").split("\n");
+      enemyBoard = convertBattlefieldToText(playerOneBattlefield, "red").split("\n");
 
       currentPlayersBoardHeader = playerTwoName;
       enemyBoardHeader = playerOneName;
@@ -330,8 +330,11 @@ public class ConsoleIO implements IO {
 
     out.printf("%-" + (distance) + "s%s\n", currentPlayersBoardHeader, enemyBoardHeader);
 
+    
     for(int i = 0; i < currentPlayersBoard.length; i++) {
-      out.printf("%-" + (distance) + "s%s\n", currentPlayersBoard[i], enemyBoard[i]);
+      int padding = currentPlayersBoard[i].replaceAll("\\u001B\\[[;\\d]*m", "").length();
+      String trueDistance = " ".repeat(distance - padding);
+      out.printf("%s" + trueDistance + "%s\n", currentPlayersBoard[i], enemyBoard[i]);
     }
   }
 
@@ -425,7 +428,15 @@ public class ConsoleIO implements IO {
     }  
   }
 
-  private String convertBattlefieldToText(boolean showHiddenShips, Battlefield battlefield) {
+  private String convertBattlefieldToText(boolean showHiddenShips, Battlefield battlefield, String battlefieldColor) {
+    if (battlefieldColor.toUpperCase().equals("RED")) {
+      battlefieldColor = RED;
+    } else if (battlefieldColor.toUpperCase().equals("BLUE")) {
+      battlefieldColor = BLUE;
+    } else {
+      battlefieldColor = "Programmer made a mistake :( ";
+    }
+
     Function<String, String> mapFieldToText = (field) -> {
       if ("emptyHit".equals(field)) return "x ";
       
@@ -445,7 +456,7 @@ public class ConsoleIO implements IO {
 
     String [][] coordinateSystem = battlefield.getCoordinateSystem();
     String[] mappedBattlefieldRows = new String[coordinateSystem.length];
-    String[] textBlocks = {"+", "---", "|"};
+    String[] textBlocks = { battlefieldColor + "+" + RESET, battlefieldColor + "---" + RESET, battlefieldColor + "|" + RESET};
 
     for (int i = 0; i < coordinateSystem.length; i++) {
       int rowIndex = coordinateSystem.length - i - 1;
@@ -478,7 +489,7 @@ public class ConsoleIO implements IO {
     return sb.toString();
   }
 
-  private String convertBattlefieldToText(Battlefield battlefield) {
-    return convertBattlefieldToText(false, battlefield);
+  private String convertBattlefieldToText(Battlefield battlefield, String battlefieldColor) {
+    return convertBattlefieldToText(false, battlefield, battlefieldColor);
   }
 }
