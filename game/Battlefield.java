@@ -74,7 +74,7 @@ public class Battlefield {
         
         
         shipsPositions.remove(parseShipId(shipId));
-        shipsPositions.add(new ArrayList<>());
+        shipsPositions.add(parseShipId(shipId), new ArrayList<>());
 
         return new GameTypes.RemovalResult(false, false, parseShipId(shipId), shipLength);
     }
