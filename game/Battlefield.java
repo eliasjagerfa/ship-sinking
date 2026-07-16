@@ -25,20 +25,20 @@ public class Battlefield {
         });
     }
 
-    public GameTypes.ShipPositionValidationResult addShip(Ship ship, int placedShipCount, Integer freeShipId) {
+    public GameTypes.ShipPositionValidationResult addShip(Ship ship, int placedShipCount) {
         GameTypes.ShipPositionValidationResult validationResult = validateShipPositions(ship);
         if (validationResult.isOutOfBounds() || validationResult.isOverlapping()) return validationResult;
         GameTypes.shipCoordinate posi;
         int[] shipPositions = ship.getPositions();
 
         for(int position : shipPositions) {
-            if(ship.isHorizontal) {
-                coordinateSystem[position][ship.y] = String.format("%d", freeShipId);
-                posi = new GameTypes.shipCoordinate(position, ship.y);
+            if(ship.getIsHorizontal()) {
+                coordinateSystem[position][ship.getY()] = String.format("%d", ship.id);
+                posi = new GameTypes.shipCoordinate(position, ship.getY());
                 shipsPositions.get(placedShipCount).add(posi);
             } else {
-                coordinateSystem[ship.x][position] = String.format("%d", freeShipId);
-                posi = new GameTypes.shipCoordinate(ship.x, position);
+                coordinateSystem[ship.getX()][position] = String.format("%d", ship.id);
+                posi = new GameTypes.shipCoordinate(ship.getX(), position);
                 shipsPositions.get(placedShipCount).add(posi);
             }
         }
@@ -47,7 +47,7 @@ public class Battlefield {
     }
 
     public GameTypes.RemovalResult removeShip(int x, int y) {
-        boolean isOutOfBounds = x <= 0 || x >= coordinateSystem.length || y <= 0 || y >= coordinateSystem.length;
+        boolean isOutOfBounds = x <= 0 || x > coordinateSystem.length || y <= 0 || y > coordinateSystem.length;
         if (isOutOfBounds) return new GameTypes.RemovalResult(isOutOfBounds, false, null, 0);
 
         String shipId = coordinateSystem[x - 1][y - 1];
@@ -87,9 +87,9 @@ public class Battlefield {
                 return new GameTypes.ShipPositionValidationResult(isOutOfBounds, false);
             }
 
-            boolean isOverlapping = ship.isHorizontal 
-                ? parseShipId(coordinateSystem[position][ship.y]) >= 0
-                : parseShipId(coordinateSystem[ship.x][position]) >= 0;
+            boolean isOverlapping = ship.getIsHorizontal() 
+                ? parseShipId(coordinateSystem[position][ship.getY()]) >= 0
+                : parseShipId(coordinateSystem[ship.getX()][position]) >= 0;
 
             if(isOverlapping) {
                 return new GameTypes.ShipPositionValidationResult(false, isOverlapping);

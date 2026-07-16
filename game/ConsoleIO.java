@@ -4,6 +4,8 @@ import static game.GameMode.*;
 import game.GameMode.GameModeTypes;
 import java.io.IOException;
 import static java.lang.System.out;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Function;
@@ -12,12 +14,12 @@ import java.util.regex.Pattern;
 
 public class ConsoleIO implements IO {
   Scanner scanner = new Scanner(System.in);
-  public final String GREY = "\u001b[90m"; //Standard color
-  public final String RESET = "\u001B[0m"; //Standard highlighter
-  public final String RED = "\u001B[31m"; //Standard error
-  public final String GREEN = "\u001B[32m"; //Standard success
-  public final String YELLOW = "\u001b[33m"; //Standard Info highlighter
-  public final String BLUE = "\u001B[34m"; //Battlefield color
+  private final String GREY = "\u001b[90m"; //Standard color
+  private final String RESET = "\u001B[0m"; //Standard highlighter
+  private final String RED = "\u001B[31m"; //Standard error
+  private final String GREEN = "\u001B[32m"; //Standard success
+  private final String YELLOW = "\u001b[33m"; //Standard Info highlighter
+  private final String BLUE = "\u001B[34m"; //Battlefield color
 
   @Override
   public GameTypes.Config inputGameConfig() {
@@ -255,10 +257,16 @@ public class ConsoleIO implements IO {
   }
 
   @Override
-  public void outputShipPlacementStatus(Map<Integer, Integer> shipsLeftToPlace) {
+  public void outputShipPlacementStatus(List<Ship> shipsLeftToPlace) {
+    Map<Integer, Integer> shipsLeftOfSize = new HashMap<>();
+
+    shipsLeftToPlace.forEach(ship -> {
+      shipsLeftOfSize.put(ship.length, shipsLeftOfSize.getOrDefault(ship.length, 0) + 1);
+    });
+
     clearScreen();
     out.print(YELLOW);
-    shipsLeftToPlace.forEach((length, amount) -> {
+    shipsLeftOfSize.forEach((length, amount) -> {   
       out.println("You have " + amount + " ship(s) of length " + length + " left to place");
     });
     out.println(GREY);
@@ -284,10 +292,12 @@ public class ConsoleIO implements IO {
   }
 
   @Override
-  public void outputSuccessfulShipPlacement(Map<Integer, Integer> shipsLeftToPlace, int length) {
+  public void outputSuccessfulShipPlacement(List<Ship> shipsLeftToPlace, int length) {
+    List<Ship> shipsOfLength = shipsLeftToPlace.stream().filter(ship -> ship.length == length).toList();
+
     clearScreen();
     out.println(GREEN + "Ship placed successfully" + YELLOW);
-    out.println("You have " + shipsLeftToPlace.get(length) + " ship(s) of length " + length + " left to place");
+    out.println("You have " + shipsOfLength.size() + " ship(s) of length " + length + " left to place");
   }
 
   @Override

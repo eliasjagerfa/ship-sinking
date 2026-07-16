@@ -2,10 +2,11 @@ package game;
 
 import static java.lang.System.out;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Game {
   private final Battlefield playerOneBattlefield;
@@ -17,8 +18,11 @@ public class Game {
   private int totalShipsToPlace  = 0;
   private final Map<Integer, Integer> shipsToPlace;
 
+  GameTypes.Config gameMode;
+
 
   public Game(GameTypes.Config gameMode, IO io) {
+    this.gameMode = gameMode;
     this.isPlayerOneTurn = true;
     this.io = io;
     shipsToPlace = new HashMap<>(gameMode.shipConfig());
@@ -39,11 +43,13 @@ public class Game {
       if (!isPlayerOneTurn) io.outputAllShipsSuccessfullyPlaced();
       io.outputPromptDeviceHandover(currentPlayer);
 
-      Map<Integer, Integer> shipsLeftToPlace = new HashMap<>(shipsToPlace);
       
-      List<Integer> freeShipIds = new ArrayList<>();
-      for (int j = 0; j < totalShipsToPlace; j++) {
-        freeShipIds.add(j + 1);
+      int nextShipId = 1;
+      List<Ship> shipsLeftToPlace = new ArrayList<>();
+      for (var c : gameMode.shipConfig().entrySet()) {
+        for (var j = 0; j < c.getValue(); j++) {
+          shipsLeftToPlace.add(new Ship(0, 0, c.getKey(), true, nextShipId++));
+        }        
       }
 
       int shipsPlaced = 0;
@@ -51,7 +57,7 @@ public class Game {
 
       io.outputInitialShipPlacementMessage();
 
-      while (totalShipsToPlace != shipsPlaced) {
+      while (!shipsLeftToPlace.isEmpty()) {
         GameTypes.ShipPositionInput inputResult = io.inputShipPositions(currentBattleField, shipsPlacedBefore, shipsPlaced, totalShipsToPlace);
 
         shipsPlacedBefore = shipsPlaced;
@@ -83,10 +89,9 @@ public class Game {
             } else if (removalResult.isEmptyField()) {
               io.outputNoShipToRemove();
             } else {
-              freeShipIds.add(removalResult.freedShipId());
-              Collections.sort(freeShipIds);
+              shipsLeftToPlace.add(new Ship(0, 0, removalResult.length(), true, removalResult.freedShipId()));
+              shipsLeftToPlace.sort(Comparator.comparingInt(ship -> ship.id));
               shipsPlaced--;
-              shipsLeftToPlace.merge(removalResult.length(), +1, Integer::sum);
             }
             continue;
           }
@@ -94,28 +99,29 @@ public class Game {
 
         if (inputResult.length() == 0) continue;
 
-        int amountShipOfLength = shipsLeftToPlace.getOrDefault(inputResult.length(), 0);
-        if (amountShipOfLength > 0) {
-          Ship newShip = new Ship(inputResult.x(), inputResult.y(), inputResult.length(), inputResult.rotation().equals("h"));  
+        Optional<Ship> currentShipOpt = shipsLeftToPlace.stream().filter(ship -> ship.length == inputResult.length()).findAny();
+        if (currentShipOpt.isEmpty()) io.outputInvalidShipSize();
+        Ship currentShip = currentShipOpt.get();          
 
-          GameTypes.ShipPositionValidationResult validationResult = currentBattleField.addShip(newShip, shipsPlaced, freeShipIds.get(0));
-          
-          if (validationResult.isOutOfBounds()) {
-            io.outputOutOfBounds();
-            continue;
-          } else if (validationResult.isOverlapping()) {
-            io.outputOverlapping();
-            continue;
-          }
+        currentShip.setX(inputResult.x());
+        currentShip.setY(inputResult.y());
+        currentShip.setIsHorizontal(inputResult.rotation().equals("h"));
 
-          shipsPlaced++;
-          shipsLeftToPlace.merge(inputResult.length(), -1, Integer::sum);
-          freeShipIds.remove(0);
+        GameTypes.ShipPositionValidationResult validationResult = currentBattleField.addShip(currentShip, shipsPlaced);
 
-          if (shipsPlaced != totalShipsToPlace) io.outputSuccessfulShipPlacement(shipsLeftToPlace, inputResult.length());
-        } else {
-          io.outputInvalidShipSize();
+        if (validationResult.isOutOfBounds()) {
+          io.outputOutOfBounds();
+          continue;
+        } else if (validationResult.isOverlapping()) {
+          io.outputOverlapping();
+          continue;
         }
+
+        shipsPlaced++;
+        shipsLeftToPlace.remove(currentShip);
+
+        if (!shipsLeftToPlace.isEmpty()) io.outputSuccessfulShipPlacement(shipsLeftToPlace, inputResult.length());
+        
       }
     }
     io.outputAllShipsSuccessfullyPlaced();

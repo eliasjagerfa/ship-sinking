@@ -1,6 +1,6 @@
 package game;
 
-import java.util.Map;
+import java.util.List;
 
 interface IO {
     GameTypes.Config inputGameConfig();
@@ -23,7 +23,7 @@ interface IO {
 
     void outputShootingHelp();
 
-    void outputShipPlacementStatus(Map<Integer, Integer> shipsLeftToPlace);
+    void outputShipPlacementStatus(List<Ship> shipsLeftToPlace);
 
     void outputOutOfBounds();
 
@@ -31,7 +31,7 @@ interface IO {
 
     void outputNoShipToRemove();
 
-    void outputSuccessfulShipPlacement(Map<Integer, Integer> shipsLeftToPlace, int length);
+    void outputSuccessfulShipPlacement(List<Ship> shipsLeftToPlace, int length);
 
     void outputShipRemovalConfirmation();
 
